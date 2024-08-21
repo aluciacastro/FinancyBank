@@ -1,11 +1,10 @@
+import 'package:cesarpay/domain/controller/ControllerRegister.dart';
 import 'package:cesarpay/presentation/validators/FormValidatorRegister.dart';
 import 'package:cesarpay/presentation/widget/ButtonCustom.dart';
 import 'package:cesarpay/presentation/widget/InputDate.dart';
 import 'package:cesarpay/presentation/widget/Inputs.dart';
 import 'package:cesarpay/presentation/widget/TextCustom.dart';
 import 'package:cesarpay/presentation/widget/Waves.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -19,17 +18,14 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final formKey = GlobalKey<FormState>();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController documentController = TextEditingController();
-  final TextEditingController dateController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
+  final RegisterController controller = RegisterController();
+  final RegisterLogic registerLogic = RegisterLogic(); 
 
-  void showSnackBar(BuildContext context, String message) {
+  void showSnackBar(BuildContext context, String message, {bool success = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: success ? Colors.green : Colors.redAccent,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -38,32 +34,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> registerUser() async {
     if (formKey.currentState?.validate() ?? false) {
       try {
-        final email = emailController.text;
-        final password = passwordController.text;
-
-        // Crea un nuevo usuario con Firebase Authentication
-        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: email,
-          password: password,
+        await registerLogic.registerUser(
+          email: controller.emailController.text,
+          password: controller.passwordController.text,
+          name: controller.nameController.text,
+          document: controller.documentController.text,
+          dateOfBirth: controller.dateController.text,
         );
 
-        // Guarda los datos adicionales en Firestore
-        await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
-          'name': nameController.text,
-          'document': documentController.text,
-          'dateOfBirth': dateController.text,
-          'email': email,
-          'password': password,
-        });
+        // Limpia los campos de texto
+        controller.emailController.clear();
+        controller.passwordController.clear();
+        controller.nameController.clear();
+        controller.documentController.clear();
+        controller.dateController.clear();
 
+        // Muestra mensaje de éxito
         // ignore: use_build_context_synchronously
-        showSnackBar(context, 'Registro exitoso');
+        showSnackBar(context, 'Registro exitoso', success: true);
+        
         // Redirige al usuario a otra pantalla si es necesario
       } catch (e) {
+        // Muestra mensaje de error
         // ignore: use_build_context_synchronously
         showSnackBar(context, 'Error al registrar usuario: $e');
       }
     }
+  }
+
+  @override
+  void dispose() {
+    controller.dispose(); // Asegúrate de liberar los recursos
+    super.dispose();
   }
 
   @override
@@ -81,7 +83,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Aquí puedes incluir tu widget Logo
                     const SizedBox(height: 5),
                     const CesarPayTitle(title: 'Registro', topPadding: 70,),
                     const SizedBox(height: 40),
@@ -92,7 +93,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       keyboardType: TextInputType.text,
                       obscureText: false,
                       validator: FormValidator.validateName,
-                      controller: nameController,
+                      controller: controller.nameController,
                     ),
                     const SizedBox(height: 20),
                     CustomTextField(
@@ -102,14 +103,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       keyboardType: TextInputType.number,
                       obscureText: false,
                       validator: FormValidator.validateDocument,
-                      controller: documentController,
+                      controller: controller.documentController,
                     ),
                     const SizedBox(height: 20),
                     DatePickerField(
                       label: 'Fecha de Nacimiento',
                       icon: Icons.calendar_today,
                       validator: FormValidator.validateDate,
-                      controller: dateController,
+                      controller: controller.dateController,
                     ),
                     const SizedBox(height: 20),
                     CustomTextField(
@@ -119,27 +120,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       keyboardType: TextInputType.emailAddress,
                       obscureText: false,
                       validator: FormValidator.validateEmail,
-                      controller: emailController,
+                      controller: controller.emailController,
                     ),
                     const SizedBox(height: 20),
                     CustomTextField(
                       label: 'Contraseña',
                       icon: Icons.lock,
-                      maxLength: 20,
-                      keyboardType: TextInputType.text,
+                      maxLength: 6,
+                      keyboardType: TextInputType.number,
                       obscureText: true,
                       validator: FormValidator.validatePassword,
-                      controller: passwordController,
+                      controller: controller.passwordController,
                     ),
                     const SizedBox(height: 20),
                     CustomTextField(
                       label: 'Confirmar Contraseña',
                       icon: Icons.lock_outline,
-                      maxLength: 20,
-                      keyboardType: TextInputType.text,
+                      maxLength: 6,
+                      keyboardType: TextInputType.number,
                       obscureText: true,
                       validator: (value) {
-                        return FormValidator.validateConfirmPassword(value, passwordController.text);
+                        return FormValidator.validateConfirmPassword(value, controller.passwordController.text);
                       },
                     ),
                     const SizedBox(height: 20),

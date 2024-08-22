@@ -1,6 +1,6 @@
-import 'package:cesarpay/presentation/screens/Login_Screen.dart';
-import 'package:cesarpay/presentation/screens/PassworrdRecovery.dart';
-import 'package:cesarpay/presentation/screens/Register_Screen.dart';
+import 'package:cesarpay/presentation/screens/login/Login_Screen.dart';
+import 'package:cesarpay/presentation/screens/login/PassworrdRecovery.dart';
+import 'package:cesarpay/presentation/screens/login/Register_Screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; 
 import 'firebase_options.dart'; 

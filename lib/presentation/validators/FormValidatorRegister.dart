@@ -51,7 +51,7 @@ class FormValidator {
     if (value == null || value.isEmpty) {
       return 'El campo Contraseña es obligatorio';
     } else if (value.length != 6) {
-      return 'La contraseña debe tener 4 dígitos';
+      return 'La contraseña debe tener 6 dígitos';
     } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
       return 'La contraseña solo debe contener números';
     }
@@ -62,9 +62,20 @@ class FormValidator {
     if (value == null || value.isEmpty) {
       return 'El campo Confirmar Contraseña es obligatorio';
     } else if (value.length != 6) {
-      return 'La contraseña debe tener 4 dígitos';
+      return 'La contraseña debe tener 6 dígitos';
     } else if (value != password) {
       return 'Las contraseñas no coinciden';
+    }
+    return null;
+  }
+
+  static String? validateVerificationCode(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'El campo Código de Verificación es obligatorio';
+    } else if (value.length != 6) {
+      return 'El código de verificación debe tener 6 dígitos';
+    } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+      return 'El código de verificación solo debe contener números';
     }
     return null;
   }

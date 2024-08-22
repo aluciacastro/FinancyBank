@@ -39,7 +39,6 @@ class RegisterLogic {
         'document': document,
         'dateOfBirth': dateOfBirth,
         'email': email,
-        'password': password,
       });
     } catch (e) {
       throw Exception('Error al registrar usuario: $e');

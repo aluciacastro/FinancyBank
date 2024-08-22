@@ -2,15 +2,15 @@ import 'package:cesarpay/presentation/screens/Login_Screen.dart';
 import 'package:cesarpay/presentation/screens/PassworrdRecovery.dart';
 import 'package:cesarpay/presentation/screens/Register_Screen.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart'; // Importar Firebase
-import 'firebase_options.dart'; // Importar el archivo generado
-import 'package:provider/provider.dart'; // Importar Provider
-import 'providers/registerProvider.dart'; // Importar el provider
+import 'package:firebase_core/firebase_core.dart'; 
+import 'firebase_options.dart'; 
+import 'package:provider/provider.dart';
+import 'providers/registerProvider.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Asegura la inicialización
+  WidgetsFlutterBinding.ensureInitialized(); 
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform, // Inicializa Firebase
+    options: DefaultFirebaseOptions.currentPlatform, 
   );
   runApp(const MyApp());
 }

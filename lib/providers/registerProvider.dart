@@ -20,14 +20,6 @@ class RegisterProvider with ChangeNotifier {
         password: password,
       );
 
-      // Aquí puedes agregar más lógica, como guardar el nombre, documento y fecha de nacimiento en Firestore
-      // Por ejemplo:
-      // await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
-      //   'name': name,
-      //   'document': document,
-      //   'birthDate': birthDate,
-      // });
-
       notifyListeners();
     } catch (e) {
       rethrow; // Manejo de errores o mostrar mensajes de error

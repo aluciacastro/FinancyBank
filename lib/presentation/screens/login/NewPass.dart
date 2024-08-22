@@ -1,21 +1,21 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:cesarpay/domain/controller/ControllerPassRecovery.dart';
-import 'package:cesarpay/presentation/validators/FormValidatorRegister.dart';
 import 'package:cesarpay/presentation/widget/ButtonCustom.dart';
 import 'package:cesarpay/presentation/widget/Inputs.dart';
 import 'package:cesarpay/presentation/widget/Logo.dart';
 import 'package:cesarpay/presentation/widget/TextCustom.dart';
 import 'package:cesarpay/presentation/widget/Waves.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-class PasswordRecoveryScreen extends StatelessWidget {
-  static const String routname = '/password';
-  const PasswordRecoveryScreen({super.key});
+class NewPasswordScreen extends StatelessWidget {
+  static const String routname = 'NewPassword';
+  const NewPasswordScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
-    final emailController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    final String? oobCode = ModalRoute.of(context)?.settings.arguments as String?;
 
     return Scaffold(
       body: Stack(
@@ -30,31 +30,40 @@ class PasswordRecoveryScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const CesarPayLogo(
-                    logoPath: 'assets/images/pass.png',
+                    logoPath: 'assets/images/newpass.png',
                   ),
                   const SizedBox(height: 5),
                   const CesarPayTitle(
                     topPadding: 5,
-                    title: 'Contraseña olvidada',
+                    title: 'Nueva Contraseña',
                   ),
                   const SizedBox(height: 40),
                   CustomTextField(
-                    controller: emailController,
-                    label: 'Correo Electrónico',
-                    icon: Icons.email,
-                    maxLength: 50,
-                    keyboardType: TextInputType.emailAddress,
-                    obscureText: false,
-                    validator: FormValidator.validateEmail,
+                    controller: newPasswordController,
+                    label: 'Nueva Contraseña',
+                    icon: Icons.lock,
+                    maxLength: 6,
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'El campo Contraseña es obligatorio';
+                      } else if (value.length != 6) {
+                        return 'La contraseña debe tener exactamente 6 dígitos';
+                      } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                        return 'La contraseña solo debe contener números';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 20),
                   CustomButton(
-                    text: 'Recuperar Contraseña',
+                    text: 'Actualizar Contraseña',
                     onPressed: () {
                       if (formKey.currentState?.validate() ?? false) {
-                        final email = emailController.text.trim();
+                        final newPassword = newPasswordController.text.trim();
                         Provider.of<PasswordRecoveryProvider>(context, listen: false)
-                            .sendRecoveryEmail(email, context); // Actualizado
+                            .resetPassword(newPassword, context, oobCode);
                       }
                     },
                   ),

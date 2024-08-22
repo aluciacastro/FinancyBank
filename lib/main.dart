@@ -1,7 +1,11 @@
 import 'package:cesarpay/app_view.dart';
+import 'package:cesarpay/domain/controller/ControllerPassRecovery.dart';
+import 'package:cesarpay/presentation/screens/login/CheckEmail.dart';
 import 'package:cesarpay/presentation/screens/login/Login_Screen.dart';
+import 'package:cesarpay/presentation/screens/login/NewPass.dart';
 import 'package:cesarpay/presentation/screens/login/PassworrdRecovery.dart';
 import 'package:cesarpay/presentation/screens/login/Register_Screen.dart';
+import 'package:cesarpay/presentation/screens/login/ResetPass.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; 
 import 'firebase_options.dart'; 
@@ -24,6 +28,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => RegisterProvider()),
+        ChangeNotifierProvider(create: (_) => PasswordRecoveryProvider()),
       ],
       child: MaterialApp(
         title: 'CesarPay',
@@ -33,6 +38,9 @@ class MyApp extends StatelessWidget {
           '/': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
           '/password': (context) => const PasswordRecoveryScreen(),
+          '/checkEmail': (context) => const CheckEmailScreen(),
+          '/newpass': (context) => const NewPasswordScreen(),
+          '/resetPassword': (context) => const ResetPasswordScreen(),
           '/home': (context) => const MyAppView(),
         },
       ),

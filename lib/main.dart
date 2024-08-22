@@ -1,3 +1,4 @@
+import 'package:cesarpay/app_view.dart';
 import 'package:cesarpay/presentation/screens/login/Login_Screen.dart';
 import 'package:cesarpay/presentation/screens/login/PassworrdRecovery.dart';
 import 'package:cesarpay/presentation/screens/login/Register_Screen.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
           '/': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
           '/password': (context) => const PasswordRecoveryScreen(),
+          '/home': (context) => const MyAppView(),
         },
       ),
     );

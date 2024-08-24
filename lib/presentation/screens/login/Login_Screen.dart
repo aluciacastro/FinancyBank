@@ -49,7 +49,10 @@ class LoginScreen extends StatelessWidget {
 
           // Navega a la pantalla principal después del login exitoso, por ejemplo:
           // ignore: use_build_context_synchronously
-          Navigator.pushReplacement(context,  MaterialPageRoute(builder: (context) => const MyAppView()),);
+          Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
+            context,
+            MaterialPageRoute(builder: (context) => MyAppView(document: document),),);
 
         } else {
           throw Exception('Usuario no encontrado con ese número de documento.');
@@ -107,7 +110,6 @@ class LoginScreen extends StatelessWidget {
                       text: 'Iniciar Sesión',
                       onPressed: () {
                         if (formKey.currentState?.validate() ?? false) {
-                          // Ejecutar la lógica de login
                           loginWithDocument(
                             document: documentController.text.trim(),
                             password: passwordController.text.trim(),

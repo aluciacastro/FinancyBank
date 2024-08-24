@@ -1,4 +1,3 @@
-import 'package:cesarpay/app_view.dart';
 import 'package:cesarpay/domain/controller/ControllerPassRecovery.dart';
 import 'package:cesarpay/presentation/screens/login/CheckEmail.dart';
 import 'package:cesarpay/presentation/screens/login/Login_Screen.dart';
@@ -41,7 +40,6 @@ class MyApp extends StatelessWidget {
           '/checkEmail': (context) => const CheckEmailScreen(),
           '/newpass': (context) => const NewPasswordScreen(),
           '/resetPassword': (context) => const ResetPasswordScreen(),
-          '/home': (context) => const MyAppView(),
         },
       ),
     );

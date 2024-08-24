@@ -3,7 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+   final String document;
+
+  const HomeScreen({super.key, required this.document});
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +50,7 @@ class HomeScreen extends StatelessWidget {
         child: const Icon(CupertinoIcons.add),
           ),
         ),
-        body: const MainScreen(),
+        body: MainScreen(document: document),
     );
   }
 }

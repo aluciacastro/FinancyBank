@@ -8,10 +8,10 @@ class CesarPayLogo extends StatelessWidget {
 
   const CesarPayLogo({
     super.key,
-    this.width = 150.0,
-    this.height = 200.0,
+    this.width = 250.0,
+    this.height = 250.0,
     this.topPadding = 0.0,
-    this.logoPath = 'assets/images/logo.png',
+    this.logoPath = 'assets/images/Logo2.png',
   });
 
   @override

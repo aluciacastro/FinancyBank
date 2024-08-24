@@ -11,7 +11,7 @@ class CesarPayLogo extends StatelessWidget {
     this.width = 250.0,
     this.height = 250.0,
     this.topPadding = 0.0,
-    this.logoPath = 'assets/images/Logo2.png',
+    this.logoPath = 'assets/images/logo3.png',
   });
 
   @override

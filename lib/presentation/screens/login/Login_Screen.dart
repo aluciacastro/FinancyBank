@@ -67,6 +67,7 @@ class LoginScreen extends StatelessWidget {
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           const WaveBackground(),
@@ -82,7 +83,7 @@ class LoginScreen extends StatelessWidget {
                   children: [
                     const CesarPayLogo(topPadding: 50,),
                     const SizedBox(height: 5),
-                    const CesarPayTitle(title: 'Inicio Sesión', topPadding: 5,),
+                    const CesarPayTitle(title: '', topPadding: 5,),
                     const SizedBox(height: 40),
                     CustomTextField(
                       controller: documentController,

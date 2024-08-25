@@ -19,6 +19,9 @@ class RegisterController {
 }
 
 class RegisterLogic {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   Future<void> registerUser({
     required String email,
     required String password,
@@ -27,14 +30,25 @@ class RegisterLogic {
     required String dateOfBirth,
   }) async {
     try {
+      // Verificar si el documento ya está registrado en Firestore
+      final QuerySnapshot result = await _firestore
+          .collection('users')
+          .where('document', isEqualTo: document)
+          .limit(1)
+          .get();
+
+      if (result.docs.isNotEmpty) {
+        throw Exception('El número de documento ya está registrado.');
+      }
+
       // Crea un nuevo usuario con Firebase Authentication
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       // Guarda los datos adicionales en Firestore
-      await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
+      await _firestore.collection('users').doc(userCredential.user?.uid).set({
         'name': name,
         'document': document,
         'dateOfBirth': dateOfBirth,

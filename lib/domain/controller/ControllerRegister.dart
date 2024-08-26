@@ -42,7 +42,8 @@ class RegisterLogic {
       }
 
       // Crea un nuevo usuario con Firebase Authentication
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );

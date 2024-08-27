@@ -15,7 +15,7 @@ class FormValidator {
     if (value == null || value.isEmpty) {
       return 'El campo Contraseña es obligatorio';
     } else if (value.length != 6) {
-      return 'La contraseña debe tener 4 dígitos';
+      return 'La contraseña debe tener 6 dígitos';
     } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
       return 'La contraseña solo debe contener números';
     }

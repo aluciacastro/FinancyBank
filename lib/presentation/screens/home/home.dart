@@ -62,10 +62,6 @@ class _HomeScreenState extends State<HomeScreen> {
               label: 'home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.graph_square_fill),
-              label: 'stats',
-            ),
-            BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.person_2_square_stack),
               label: 'Perfil',
             ),

@@ -1,8 +1,8 @@
+import 'package:cesarpay/presentation/formulas/compound_interest_screen.dart';
 import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
 import 'package:cesarpay/presentation/screens/home/main_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 class HomeScreen extends StatefulWidget {
   final String document;
 
@@ -16,16 +16,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  // Definir las pantallas para cada pestaña
   late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
     _screens = [
-      MainScreen(document: widget.document), // Pantalla principal
+      MainScreen(document: widget.document),
       Container(), // Placeholder para estadísticas
-      const UserProfileScreen(), // Pantalla de perfil de usuario
+      const UserProfileScreen(),
     ];
   }
 
@@ -34,13 +33,51 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentIndex = index;
     });
 
-    // Navegar a la pantalla de perfil si el índice es 2
     if (index == 2) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const UserProfileScreen()),
       );
     }
+  }
+
+  void _showOptionsMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(CupertinoIcons.chart_pie),
+                title: const Text('Interés Compuesto'),
+                onTap: () {
+                  Navigator.pop(context); // Cierra el menú
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CompoundInterestScreen(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(CupertinoIcons.chart_bar),
+                title: const Text('Interés Simple'),
+                onTap: () {
+                  // Acción para Interés Simple
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -70,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => _showOptionsMenu(context),
         shape: const CircleBorder(),
         child: Container(
           width: 60,
@@ -86,8 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: const Icon(CupertinoIcons.add),
         ),
       ),
-      body: _screens[
-          _currentIndex], // Cambia el contenido según el índice seleccionado
+      body: _screens[_currentIndex],
     );
   }
 }

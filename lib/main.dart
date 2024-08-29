@@ -10,7 +10,9 @@ import 'package:cesarpay/providers/UserProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+
 import 'providers/registerProvider.dart';
 
 void main() async {
@@ -18,7 +20,18 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(
+    riverpod.ProviderScope(
+    child: provider.MultiProvider(
+      providers: [
+        provider.ChangeNotifierProvider(create: (_) => RegisterProvider()),
+        provider.ChangeNotifierProvider(create: (_) => PasswordRecoveryProvider()),
+        provider.ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+        child: const MyApp(),
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -26,26 +39,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => RegisterProvider()),
-        ChangeNotifierProvider(create: (_) => PasswordRecoveryProvider()),
-        ChangeNotifierProvider(create: (_) => UserProvider()),
-      ],
-      child: MaterialApp(
-        title: 'CesarPay',
-        debugShowCheckedModeBanner: false,
-        initialRoute: LoginScreen.routname,
-        routes: {
-          '/': (context) => const LoginScreen(),
-          '/register': (context) => const RegisterScreen(),
-          '/password': (context) => const PasswordRecoveryScreen(),
-          '/checkEmail': (context) => const CheckEmailScreen(),
-          '/newpass': (context) => const NewPasswordScreen(),
-          '/resetPassword': (context) => const ResetPasswordScreen(),
-          '/profile': (context) => const UserProfileScreen(),
-        },
-      ),
+    return MaterialApp(
+      title: 'CesarPay',
+      debugShowCheckedModeBanner: false,
+      initialRoute: LoginScreen.routname,
+      routes: {
+        '/': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/password': (context) => const PasswordRecoveryScreen(),
+        '/checkEmail': (context) => const CheckEmailScreen(),
+        '/newpass': (context) => const NewPasswordScreen(),
+        '/resetPassword': (context) => const ResetPasswordScreen(),
+        '/profile': (context) => const UserProfileScreen(),
+      },
     );
   }
 }

@@ -14,7 +14,7 @@ class CustomBackground extends StatelessWidget {
     required this.child,
     this.showArrow = false,
     this.showLogo = false,
-    this.height = 200,
+    this.height = 150,
   });
 
   @override
@@ -23,7 +23,6 @@ class CustomBackground extends StatelessWidget {
       body: Stack(
         alignment: Alignment.center,
         children: [
-          const WaveBackground(), // Reemplaza _CustomLines por WaveBackground
           if (showArrow)
             const CloseIcon(
               navigation: "/login",

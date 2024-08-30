@@ -1,4 +1,5 @@
 import 'package:cesarpay/presentation/formulas/compound_interest_screen.dart';
+import 'package:cesarpay/presentation/formulas/simple_interest_screen.dart';
 import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
 import 'package:cesarpay/presentation/screens/home/main_screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -70,7 +71,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(CupertinoIcons.chart_bar),
                 title: const Text('Interés Simple'),
                 onTap: () {
-                  // Acción para Interés Simple
+                  Navigator.pop(context); // Cierra el menú
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SimpleInterestScreen(),
+                    ),
+                  );
                 },
               ),
             ],

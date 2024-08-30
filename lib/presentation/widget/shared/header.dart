@@ -14,21 +14,12 @@ class Header extends StatelessWidget {
       children: [
         const SizedBox(height: 10),
         Text(
-          "INGEMATH",
+          "FINANCYBANK",
           style: GoogleFonts.squadaOne().copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFFFF833D),
+              color: const Color.fromARGB(255, 31, 8, 236),
               letterSpacing: 7,
-              height: 0),
-        ),
-        Text(
-          "MONEY",
-          style: GoogleFonts.squadaOne().copyWith(
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              color: const Color(0xFF7ED957),
-              letterSpacing: 3,
               height: 0),
         ),
       ],

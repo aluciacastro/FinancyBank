@@ -12,7 +12,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
-
 import 'providers/registerProvider.dart';
 
 void main() async {

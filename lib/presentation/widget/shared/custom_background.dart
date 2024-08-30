@@ -23,6 +23,7 @@ class CustomBackground extends StatelessWidget {
       body: Stack(
         alignment: Alignment.center,
         children: [
+          const WaveBackground(), 
           if (showArrow)
             const CloseIcon(
               navigation: "/login",

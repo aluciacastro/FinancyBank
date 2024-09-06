@@ -9,10 +9,13 @@ import 'package:cesarpay/presentation/screens/login/ResetPass.dart';
 import 'package:cesarpay/providers/UserProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
-import 'package:provider/provider.dart' as provider;
-import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'providers/registerProvider.dart';
+
+final registerProvider = ChangeNotifierProvider<RegisterProvider>((ref) => RegisterProvider());
+final passwordRecoveryProvider = ChangeNotifierProvider<PasswordRecoveryProvider>((ref) => PasswordRecoveryProvider());
+final userProvider = ChangeNotifierProvider<UserProvider>((ref) => UserProvider());
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,15 +23,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(
-    riverpod.ProviderScope(
-    child: provider.MultiProvider(
-      providers: [
-        provider.ChangeNotifierProvider(create: (_) => RegisterProvider()),
-        provider.ChangeNotifierProvider(create: (_) => PasswordRecoveryProvider()),
-        provider.ChangeNotifierProvider(create: (_) => UserProvider()),
-      ],
-        child: const MyApp(),
-      ),
+    const ProviderScope(
+      child: MyApp(),
     ),
   );
 }

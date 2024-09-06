@@ -1,7 +1,6 @@
 import 'package:cesarpay/presentation/widget/shared/custom_filled_button.dart';
 import 'package:cesarpay/presentation/widget/shared/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class CustomTimeFormField extends StatelessWidget {
   final bool? enable;
@@ -103,7 +102,7 @@ class _TimeFormState extends State<_TimeForm> {
 
                 widget.setTime(years + days / 360 + weeks / 52 + months / 12);
 
-                context.pop();
+                Navigator.of(context).pop();
               },
               child: const Text("Establecer"),
             ),

@@ -10,15 +10,11 @@ import '../widget/shared/custom_filled_button.dart';
 import '../widget/shared/custom_text_form_field.dart';
 import '../widget/shared/header.dart';
 
-
 class CompoundInterestScreen extends StatelessWidget {
   const CompoundInterestScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Crear un ProviderContainer para manejar el estado de Riverpod localmente
-    final container = ProviderContainer();
-
     return CustomBackground(
       height: 200,
       showArrow: true,
@@ -32,12 +28,12 @@ class CompoundInterestScreen extends StatelessWidget {
               const SizedBox(height: 20),
               Container(
                 width: double.infinity,
-                height: 600,
+                height: 685,
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(255, 255, 255, 255),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: _CompoundInterestForm(container: container),
+                child: const _CompoundInterestForm(),
               ),
             ],
           ),
@@ -47,15 +43,12 @@ class CompoundInterestScreen extends StatelessWidget {
   }
 }
 
-class _CompoundInterestForm extends StatelessWidget {
-  final ProviderContainer container;
-
-  const _CompoundInterestForm({required this.container});
+class _CompoundInterestForm extends ConsumerWidget {
+  const _CompoundInterestForm();
 
   @override
-  Widget build(BuildContext context) {
-    // Usar el container para leer los proveedores
-    final compoundForm = container.read(compoundFormProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final compoundForm = ref.watch(compoundFormProvider);
     final keyOptions = compoundForm.menuOptions.keys.toList();
     final textStyles = Theme.of(context).textTheme;
 
@@ -106,7 +99,7 @@ class _CompoundInterestForm extends StatelessWidget {
               hintText: "Seleccionar",
               options: compoundForm.menuOptions,
               onSelected: (value) {
-                container
+                ref
                     .read(compoundFormProvider.notifier)
                     .onOptionsCompoundChanged(value!);
               },
@@ -131,7 +124,7 @@ class _CompoundInterestForm extends StatelessWidget {
               enable: compoundForm.variable != keyOptions[0],
               label: "Monto compuesto",
               onChanged: (value) {
-                container
+                ref
                     .read(compoundFormProvider.notifier)
                     .onAmountChanged(double.tryParse(value) ?? 0);
               },
@@ -145,7 +138,7 @@ class _CompoundInterestForm extends StatelessWidget {
               enable: compoundForm.variable != keyOptions[1],
               label: "Capital",
               onChanged: (value) {
-                container
+                ref
                     .read(compoundFormProvider.notifier)
                     .onCapitalChanged(double.tryParse(value) ?? 0);
               },
@@ -161,7 +154,7 @@ class _CompoundInterestForm extends StatelessWidget {
                   compoundForm.variable != keyOptions[3],
               label: "Tasa de interés (%)",
               onChanged: (value) {
-                container
+                ref
                     .read(compoundFormProvider.notifier)
                     .onInterestRateChanged(double.tryParse(value) ?? 0);
               },
@@ -181,7 +174,7 @@ class _CompoundInterestForm extends StatelessWidget {
               hintText: "Seleccionar ",
               options: compoundForm.menuOptionsTypeInterest,
               onSelected: (value) {
-                container
+                ref
                     .read(compoundFormProvider.notifier)
                     .onOptionsTypeInterestRateChanged(value!);
               },
@@ -201,7 +194,7 @@ class _CompoundInterestForm extends StatelessWidget {
               hintText: "Seleccionar ",
               options: compoundForm.menuOptionsCap,
               onSelected: (value) {
-                container
+                ref
                     .read(compoundFormProvider.notifier)
                     .onOptionsCapitalizationChanged(value!);
               },
@@ -216,14 +209,14 @@ class _CompoundInterestForm extends StatelessWidget {
             CustomTimeCapFormField(
                 compoundFromState: compoundForm,
                 keyOptions: keyOptions,
-                container: container ),
+                ref: ref),
 
             const SizedBox(height: 45),
             SizedBox(
               width: double.infinity,
               height: 40,
               child: CustomFilledButton(
-                onPressed: container.read(compoundFormProvider.notifier).calculate,
+                onPressed: ref.read(compoundFormProvider.notifier).calculate,
                 child: const Text("Calcular"),
               ),
             ),
@@ -234,13 +227,13 @@ class _CompoundInterestForm extends StatelessWidget {
               height: 100,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: const Color.fromARGB(255, 70, 181, 251)
+                color: const Color.fromARGB(255, 70, 181, 251),
               ),
               child: Column(
                 children: [
                   const Text(
                     "RESULTADO:",
-                    style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+                    style: TextStyle(color: Colors.white),
                   ),
                   const SizedBox(height: 6),
                   if (compoundForm.isFormPosted)

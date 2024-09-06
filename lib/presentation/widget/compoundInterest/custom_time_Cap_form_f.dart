@@ -6,19 +6,22 @@ import '../shared/custom_filled_button.dart';
 import 'custom_text_form_field_M.dart';
 
 
-class CustomTimeCapFormField extends ConsumerWidget {
+class CustomTimeCapFormField extends StatelessWidget {
   const CustomTimeCapFormField({
     super.key,
     required this.compoundFromState,
-    required this.keyOptions, required ProviderContainer container,
+    required this.keyOptions,
+    required this.ref,
   });
 
   final CompoundFromState compoundFromState;
   final List<CompoundVariable> keyOptions;
+  final WidgetRef ref;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final capitalizationPeriod = ref.watch(compoundFormProvider).capitalizationPeriod;
+  Widget build(BuildContext context) {
+    final capitalizationPeriod =
+        ref.watch(compoundFormProvider).capitalizationPeriod;
 
     return CustomTextFormFieldCap(
       icon: Icons.calendar_today,
@@ -114,7 +117,9 @@ class CustomTimeCapFormField extends ConsumerWidget {
 
                               Navigator.of(context).pop();
 
-                              ref.read(compoundFormProvider.notifier).onTimeChanged(result);
+                              ref
+                                  .read(compoundFormProvider.notifier)
+                                  .onTimeChanged(result);
                             },
                             child: const Text("Establecer"),
                           ),

@@ -1,17 +1,17 @@
 import 'dart:math';
-import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
 
 class MainScreen extends StatelessWidget {
   final String document;
 
   const MainScreen({super.key, required this.document});
 
-  Future<String> _getUserName() async {
+  Future<Map<String, dynamic>> _getUserData() async {
     try {
-      // Realiza la consulta en Firestore para obtener el nombre del usuario con el documento proporcionado
+      // Realiza la consulta en Firestore para obtener los datos del usuario con el documento proporcionado
       QuerySnapshot userSnapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('document', isEqualTo: document)
@@ -19,12 +19,12 @@ class MainScreen extends StatelessWidget {
           .get();
 
       if (userSnapshot.docs.isNotEmpty) {
-        return userSnapshot.docs.first['name'];
+        return userSnapshot.docs.first.data() as Map<String, dynamic>;
       } else {
-        return 'Usuario no encontrado';
+        throw Exception('Usuario no encontrado');
       }
     } catch (e) {
-      return 'Error al obtener el nombre';
+      throw Exception('Error al obtener datos del usuario: $e');
     }
   }
 
@@ -40,21 +40,60 @@ class MainScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
+                    FutureBuilder<Map<String, dynamic>>(
+                      future: _getUserData(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.yellow[700]),
-                        ),
-                        Icon(
-                          CupertinoIcons.person_fill,
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                      ],
+                              color: Colors.yellow[700],
+                            ),
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+                          return Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.yellow[700],
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                CupertinoIcons.person_fill,
+                                color: Colors.white,
+                              ),
+                            ),
+                          );
+                        } else {
+                          final userData = snapshot.data!;
+                          final photoUrl = userData['photoUrl'] as String?;
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const UserProfileScreen(),
+                                ),
+                              );
+                            },
+                            child: CircleAvatar(
+                              radius: 25,
+                              backgroundImage: photoUrl != null
+                                  ? NetworkImage(photoUrl)
+                                  : const AssetImage('assets/images/default_user.jpg') as ImageProvider,
+                              child: photoUrl == null
+                                  ? const Icon(CupertinoIcons.photo, size: 25, color: Colors.white)
+                                  : null,
+                            ),
+                          );
+                        }
+                      },
                     ),
                     const SizedBox(width: 8),
                     Column(
@@ -68,11 +107,10 @@ class MainScreen extends StatelessWidget {
                             color: Theme.of(context).colorScheme.outline,
                           ),
                         ),
-                        FutureBuilder<String>(
-                          future: _getUserName(),
+                        FutureBuilder<Map<String, dynamic>>(
+                          future: _getUserData(),
                           builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
                               return const Text(
                                 "Cargando...",
                                 style: TextStyle(
@@ -81,7 +119,7 @@ class MainScreen extends StatelessWidget {
                                   color: Colors.grey,
                                 ),
                               );
-                            } else if (snapshot.hasError) {
+                            } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
                               return const Text(
                                 "Error",
                                 style: TextStyle(
@@ -91,14 +129,14 @@ class MainScreen extends StatelessWidget {
                                 ),
                               );
                             } else {
+                              final userData = snapshot.data!;
+                              final name = userData['name'] as String? ?? 'Nombre no disponible';
                               return Text(
-                                snapshot.data ?? 'Nombre no disponible',
+                                name,
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurface,
+                                  color: Theme.of(context).colorScheme.onSurface,
                                 ),
                               );
                             }
@@ -114,9 +152,9 @@ class MainScreen extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => const UserProfileScreen(),
-                        ),
-                      );
-                    },
+                      ),
+                    );
+                  },
                   icon: const Icon(CupertinoIcons.settings),
                 )
               ],

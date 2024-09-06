@@ -1,18 +1,17 @@
-import 'package:cesarpay/providers/UserProvider.dart';
+import 'package:cesarpay/providers/change_providers.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class UserProfileScreen extends StatefulWidget {
+class UserProfileScreen extends ConsumerStatefulWidget {
   static const String routeName = 'userProfile';
 
   const UserProfileScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _UserProfileScreenState createState() => _UserProfileScreenState();
+  ConsumerState<UserProfileScreen> createState() => _UserProfileScreenState();
 }
 
-class _UserProfileScreenState extends State<UserProfileScreen> {
+class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
   late TextEditingController nameController;
   late TextEditingController documentController;
   late TextEditingController dateController;
@@ -31,28 +30,26 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    await userProvider.loadUserData();
-    final user = userProvider.user;
+    final userNotifier = ref.read(userProvider.notifier);
+    await userNotifier.loadUserData();
+    final user = ref.watch(userProvider);
     if (user != null) {
       nameController.text = user.name;
-      documentController.text =
-          user.documentId; // Assuming you have this in User model
-      dateController.text =
-          user.dateOfBirth; // Assuming you have this in User model
+      documentController.text = user.documentId;
+      dateController.text = user.dateOfBirth;
       emailController.text = user.email;
       phoneController.text = user.phone;
     }
   }
 
   Future<void> _updateUserProfile() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    await userProvider.updateUserData(
+    final userNotifier = ref.read(userProvider.notifier);
+    await userNotifier.updateUserData(
       email: emailController.text,
       phone: phoneController.text,
       name: nameController.text,
-      document: '',
-      dateOfBirth: '',
+      document: documentController.text,
+      dateOfBirth: dateController.text,
     );
     // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(
@@ -83,20 +80,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             const SizedBox(height: 10),
             TextFormField(
               controller: dateController,
-              decoration:
-                  const InputDecoration(labelText: 'Fecha de Nacimiento'),
+              decoration: const InputDecoration(labelText: 'Fecha de Nacimiento'),
             ),
             const SizedBox(height: 10),
             TextFormField(
               controller: emailController,
-              decoration:
-                  const InputDecoration(labelText: 'Correo Electrónico'),
+              decoration: const InputDecoration(labelText: 'Correo Electrónico'),
             ),
             const SizedBox(height: 10),
             TextFormField(
               controller: phoneController,
-              decoration:
-                  const InputDecoration(labelText: 'Número de Teléfono'),
+              decoration: const InputDecoration(labelText: 'Número de Teléfono'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(

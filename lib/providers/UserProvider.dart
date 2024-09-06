@@ -2,28 +2,21 @@
 import 'package:cesarpay/domain/controller/ControllerProfile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class UserProvider extends ChangeNotifier {
+class UserProvider extends StateNotifier<UserModel?> {
+  UserProvider() : super(null) {
+    loadUserData();
+  }
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  UserModel? _user;
-
-  UserModel? get user => _user;
-
-  get documentController => null;
-
-  get dateController => null;
-
-  get nameController => null;
 
   Future<void> loadUserData() async {
     final user = _auth.currentUser;
     if (user != null) {
       final doc = await _firestore.collection('users').doc(user.uid).get();
-      _user = UserModel.fromMap(doc.data() ?? {});
-      notifyListeners();
+      state = UserModel.fromMap(doc.data() ?? {});
     }
   }
 
@@ -43,8 +36,7 @@ class UserProvider extends ChangeNotifier {
       });
 
       if (user.email != email) {
-        await user
-            .verifyBeforeUpdateEmail(email); // Usa el nuevo método recomendado
+        await user.verifyBeforeUpdateEmail(email); // Usa el nuevo método recomendado
         await sendEmailChangeNotification();
       }
     }
@@ -57,3 +49,6 @@ class UserProvider extends ChangeNotifier {
     }
   }
 }
+
+
+

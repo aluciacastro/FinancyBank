@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -108,8 +109,16 @@ class MainScreen extends StatelessWidget {
                   ],
                 ),
                 IconButton(
-                    onPressed: () {},
-                    icon: const Icon(CupertinoIcons.settings))
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const UserProfileScreen(),
+                        ),
+                      );
+                    },
+                  icon: const Icon(CupertinoIcons.settings),
+                )
               ],
             ),
             const SizedBox(height: 20),

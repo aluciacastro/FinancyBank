@@ -1,4 +1,5 @@
 import 'package:cesarpay/presentation/formulas/compound_interest_screen.dart';
+import 'package:cesarpay/presentation/formulas/gradient_screen.dart';
 import 'package:cesarpay/presentation/formulas/simple_interest_screen.dart';
 import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
 import 'package:cesarpay/presentation/screens/home/main_screen.dart';
@@ -43,49 +44,63 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showOptionsMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(CupertinoIcons.chart_pie),
-                title: const Text('Interés Compuesto'),
-                onTap: () {
-                  Navigator.pop(context); // Cierra el menú
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CompoundInterestScreen(),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(CupertinoIcons.chart_bar),
-                title: const Text('Interés Simple'),
-                onTap: () {
-                  Navigator.pop(context); // Cierra el menú
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SimpleInterestScreen(),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+    ),
+    builder: (context) {
+      return Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(CupertinoIcons.chart_pie),
+              title: const Text('Interés Compuesto'),
+              onTap: () {
+                Navigator.pop(context); // Cierra el menú
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CompoundInterestScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(CupertinoIcons.chart_bar),
+              title: const Text('Interés Simple'),
+              onTap: () {
+                Navigator.pop(context); // Cierra el menú
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SimpleInterestScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.gradient),
+              title: const Text('Gradiente'),
+              onTap: () {
+                Navigator.pop(context); // Cierra el menú
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const GradientScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.person_2_square_stack),
-              label: 'Perfil',
+              label: 'profile',
             ),
           ],
         ),

@@ -1,4 +1,3 @@
-import 'package:cesarpay/domain/controller/ControllerPassRecovery.dart';
 import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
 import 'package:cesarpay/presentation/screens/login/CheckEmail.dart';
 import 'package:cesarpay/presentation/screens/login/Login_Screen.dart';
@@ -6,17 +5,10 @@ import 'package:cesarpay/presentation/screens/login/NewPass.dart';
 import 'package:cesarpay/presentation/screens/login/PassworrdRecovery.dart';
 import 'package:cesarpay/presentation/screens/login/Register_Screen.dart';
 import 'package:cesarpay/presentation/screens/login/ResetPass.dart';
-import 'package:cesarpay/providers/UserProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
-import 'providers/registerProvider.dart';
-
-final registerProvider = ChangeNotifierProvider<RegisterProvider>((ref) => RegisterProvider());
-final passwordRecoveryProvider = ChangeNotifierProvider<PasswordRecoveryProvider>((ref) => PasswordRecoveryProvider());
-final userProvider = ChangeNotifierProvider<UserProvider>((ref) => UserProvider());
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -35,7 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CesarPay',
+      title: 'FINANCYBANK',
       debugShowCheckedModeBanner: false,
       initialRoute: LoginScreen.routname,
       routes: {

@@ -59,7 +59,7 @@ class _CompoundInterestForm extends ConsumerWidget {
           children: [
             Text("Interés Compuesto", style: textStyles.titleLarge),
             const Divider(
-              color: Color.fromARGB(255, 31, 8, 236),
+              color: Color.fromARGB(255, 0, 140, 255),
               thickness: 5,
               indent: 6,
               endIndent: 6,
@@ -112,7 +112,7 @@ class _CompoundInterestForm extends ConsumerWidget {
             Text(
               "Completa la siguiente información",
               style: GoogleFonts.montserrat().copyWith(
-                color: const Color.fromARGB(255, 31, 8, 236),
+                color: const Color.fromARGB(255, 0, 140, 255),
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -217,7 +217,9 @@ class _CompoundInterestForm extends ConsumerWidget {
               height: 40,
               child: CustomFilledButton(
                 onPressed: ref.read(compoundFormProvider.notifier).calculate,
+                // ignore: sort_child_properties_last
                 child: const Text("Calcular"),
+                buttonColor: const Color.fromARGB(255, 0, 140, 255),
               ),
             ),
             const SizedBox(height: 20),
@@ -227,7 +229,7 @@ class _CompoundInterestForm extends ConsumerWidget {
               height: 100,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: const Color.fromARGB(255, 70, 181, 251),
+                color: const Color.fromARGB(255, 0, 140, 255),
               ),
               child: Column(
                 children: [

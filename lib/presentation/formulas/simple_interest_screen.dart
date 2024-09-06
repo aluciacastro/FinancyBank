@@ -60,7 +60,7 @@ class _SimpleInterestForm extends ConsumerWidget {
           children: [
             Text("Interés simple", style: textStyles.titleLarge),
             const Divider(
-              color: Color.fromARGB(255, 31, 8, 236),
+              color: Color.fromARGB(255, 0, 140, 255),
               thickness: 5,
               indent: 50,
               endIndent: 50,
@@ -173,7 +173,9 @@ class _SimpleInterestForm extends ConsumerWidget {
               height: 40,
               child: CustomFilledButton(
                 onPressed: ref.read(simpleFormProvider.notifier).calculate,
+                // ignore: sort_child_properties_last
                 child: const Text("Calcular"),
+                buttonColor: const Color.fromARGB(255, 0, 140, 255),
               ),
             ),
 
@@ -185,7 +187,7 @@ class _SimpleInterestForm extends ConsumerWidget {
               height: 100,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: const Color.fromARGB(255, 70, 181, 251),
+                color: const Color.fromARGB(255, 0, 140, 255),
               ),
               child: Column(
                 children: [

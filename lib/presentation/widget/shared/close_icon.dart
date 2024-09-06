@@ -27,7 +27,7 @@ class CloseIcon extends StatelessWidget {
         },
         icon: Icon(
           icon,
-          color: const Color.fromARGB(255, 255, 255, 255),
+          color: const Color.fromARGB(255, 0, 140, 255),
           size: screenWidth * 0.1,
         ),
       ),

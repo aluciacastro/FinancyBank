@@ -114,7 +114,6 @@ class LoginScreen extends StatelessWidget {
                           loginWithDocument(
                             document: documentController.text.trim(),
                             password: passwordController.text.trim(),
-                            
                           );
                         }
                       },

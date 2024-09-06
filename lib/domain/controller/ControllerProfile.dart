@@ -8,6 +8,7 @@ class UserModel {
   final String dateOfBirth;
   final String email;
   final String phone;
+  final String? photoUrl; // Agrega photoUrl
 
   UserModel({
     required this.name,
@@ -15,6 +16,7 @@ class UserModel {
     required this.dateOfBirth,
     required this.email,
     required this.phone,
+    this.photoUrl,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
@@ -24,9 +26,11 @@ class UserModel {
       dateOfBirth: map['dateOfBirth'] ?? '',
       email: map['email'] ?? '',
       phone: map['phone'] ?? '',
+      photoUrl: map['photoUrl'], // Asegúrate de que se maneje correctamente
     );
   }
 }
+
 
 class UserNotifier extends StateNotifier<UserModel?> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -42,27 +46,37 @@ class UserNotifier extends StateNotifier<UserModel?> {
     }
   }
 
-  Future<void> updateUserData({
+    Future<void> updateUserData({
     required String email,
     required String phone,
     required String name,
     required String document,
     required String dateOfBirth,
+    String? photoUrl, // Agregado parámetro photoUrl
   }) async {
     final user = _auth.currentUser;
     if (user != null) {
-      await _firestore.collection('users').doc(user.uid).update({
+      final updateData = {
         'email': email,
         'phone': phone,
         'name': name,
-      });
+        'documentId': document,
+        'dateOfBirth': dateOfBirth,
+      };
+
+      if (photoUrl != null) {
+        updateData['photoUrl'] = photoUrl; // Incluye photoUrl solo si está disponible
+      }
+
+      await _firestore.collection('users').doc(user.uid).update(updateData);
 
       if (user.email != email) {
-        await user.verifyBeforeUpdateEmail(email);
+        await user.verifyBeforeUpdateEmail(email); // Usa el nuevo método recomendado
         await sendEmailChangeNotification();
       }
     }
   }
+
 
   Future<void> sendEmailChangeNotification() async {
     final user = _auth.currentUser;

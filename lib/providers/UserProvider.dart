@@ -1,4 +1,3 @@
-// lib/providers/user_provider.dart
 import 'package:cesarpay/domain/controller/ControllerProfile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -26,14 +25,23 @@ class UserProvider extends StateNotifier<UserModel?> {
     required String name,
     required String document,
     required String dateOfBirth,
+    String? photoUrl, // Agrega photoUrl
   }) async {
     final user = _auth.currentUser;
     if (user != null) {
-      await _firestore.collection('users').doc(user.uid).update({
+      final updateData = {
         'email': email,
         'phone': phone,
         'name': name,
-      });
+        'documentId': document,
+        'dateOfBirth': dateOfBirth,
+      };
+
+      if (photoUrl != null) {
+        updateData['photoUrl'] = photoUrl; // Incluye photoUrl solo si está disponible
+      }
+
+      await _firestore.collection('users').doc(user.uid).update(updateData);
 
       if (user.email != email) {
         await user.verifyBeforeUpdateEmail(email); // Usa el nuevo método recomendado
@@ -49,6 +57,3 @@ class UserProvider extends StateNotifier<UserModel?> {
     }
   }
 }
-
-
-

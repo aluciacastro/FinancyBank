@@ -1,6 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+import 'dart:io';
 import 'package:cesarpay/providers/change_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class UserProfileScreen extends ConsumerStatefulWidget {
   static const String routeName = 'userProfile';
@@ -17,6 +21,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
   late TextEditingController dateController;
   late TextEditingController emailController;
   late TextEditingController phoneController;
+  String? _photoUrl;
+
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -30,35 +37,99 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final userNotifier = ref.read(userProvider.notifier);
-    await userNotifier.loadUserData();
-    final user = ref.watch(userProvider);
-    if (user != null) {
-      nameController.text = user.name;
-      documentController.text = user.documentId;
-      dateController.text = user.dateOfBirth;
-      emailController.text = user.email;
-      phoneController.text = user.phone;
+    try {
+      final userNotifier = ref.read(userProvider.notifier);
+      await userNotifier.loadUserData();
+      final user = ref.watch(userProvider);
+
+      if (user != null) {
+        nameController.text = user.name;
+        documentController.text = user.documentId;
+        dateController.text = user.dateOfBirth;
+        emailController.text = user.email;
+        phoneController.text = user.phone;
+        setState(() {
+          _photoUrl = user.photoUrl;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo cargar los datos del usuario.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al cargar los datos: $e')),
+      );
     }
   }
 
   Future<void> _updateUserProfile() async {
-    final userNotifier = ref.read(userProvider.notifier);
-    await userNotifier.updateUserData(
-      email: emailController.text,
-      phone: phoneController.text,
-      name: nameController.text,
-      document: documentController.text,
-      dateOfBirth: dateController.text,
-    );
-    // ignore: use_build_context_synchronously
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Datos actualizados exitosamente')),
-    );
+    try {
+      final userNotifier = ref.read(userProvider.notifier);
+      await userNotifier.updateUserData(
+        email: emailController.text,
+        phone: phoneController.text,
+        name: nameController.text,
+        document: documentController.text,
+        dateOfBirth: dateController.text,
+        photoUrl: _photoUrl,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Datos actualizados exitosamente')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al actualizar los datos: $e')),
+      );
+    }
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        File imageFile = File(pickedFile.path);
+        await _uploadImage(imageFile);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al seleccionar la imagen: $e')),
+      );
+    }
+  }
+
+  Future<void> _uploadImage(File imageFile) async {
+    try {
+      String fileName = DateTime.now().toString();
+      Reference storageRef = FirebaseStorage.instance.ref().child('profile_images/$fileName');
+      UploadTask uploadTask = storageRef.putFile(imageFile);
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String photoUrl = await taskSnapshot.ref.getDownloadURL();
+
+      setState(() {
+        _photoUrl = photoUrl;
+      });
+
+      // Actualiza la URL de la imagen en la base de datos
+      final userNotifier = ref.read(userProvider.notifier);
+      await userNotifier.updateUserData(
+        email: emailController.text,
+        phone: phoneController.text,
+        name: nameController.text,
+        document: documentController.text,
+        dateOfBirth: dateController.text,
+        photoUrl: _photoUrl,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al subir la imagen: $e')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(userProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Perfil de Usuario'),
@@ -68,14 +139,24 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: GestureDetector(
+                onTap: _pickImage,
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundImage: _photoUrl != null
+                      ? NetworkImage(_photoUrl!)
+                      : const AssetImage('assets/images/user.jpg') as ImageProvider,
+                  child: _photoUrl == null
+                      ? const Icon(Icons.camera_alt, size: 50, color: Colors.white)
+                      : null,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
             TextFormField(
               controller: nameController,
               decoration: const InputDecoration(labelText: 'Nombre y Apellido'),
-            ),
-            const SizedBox(height: 10),
-            TextFormField(
-              controller: documentController,
-              decoration: const InputDecoration(labelText: 'Cédula'),
             ),
             const SizedBox(height: 10),
             TextFormField(

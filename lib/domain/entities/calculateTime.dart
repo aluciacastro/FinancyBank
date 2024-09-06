@@ -1,5 +1,6 @@
 import '../domain.dart';
 
+// ignore: non_constant_identifier_names
 double formulaTiempo(int M4, int M5, int M6, int M7, int M8, int M9,
     CapitalizationPeriod capitalizationPeriod) {
   double tiempo = 0;

@@ -4,21 +4,39 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
 
-class MainScreen extends StatelessWidget {
-  final String document;
+class MainScreen extends StatefulWidget {
+  final String document; // Aceptamos el documento como parámetro
 
   const MainScreen({super.key, required this.document});
 
+  @override
+  // ignore: library_private_types_in_public_api
+  _MainScreenState createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // ignore: avoid_print
+    print('Documento en MainScreen: ${widget.document}');
+    // Ya no es necesario cargar el documento aquí, porque se pasa como parámetro.
+  }
+
   Future<Map<String, dynamic>> _getUserData() async {
+    if (widget.document.isEmpty) {
+      throw Exception('Documento no disponible');
+    }
     try {
-      // Realiza la consulta en Firestore para obtener los datos del usuario con el documento proporcionado
       QuerySnapshot userSnapshot = await FirebaseFirestore.instance
           .collection('users')
-          .where('document', isEqualTo: document)
+          .where('document', isEqualTo: widget.document) // Usamos el documento de widget
           .limit(1)
           .get();
 
       if (userSnapshot.docs.isNotEmpty) {
+        // ignore: avoid_print
+        print('Usuario encontrado: ${userSnapshot.docs.first.data()}');
         return userSnapshot.docs.first.data() as Map<String, dynamic>;
       } else {
         throw Exception('Usuario no encontrado');
@@ -165,15 +183,16 @@ class MainScreen extends StatelessWidget {
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.width / 2,
               decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).colorScheme.primary,
-                      Theme.of(context).colorScheme.secondary,
-                      Theme.of(context).colorScheme.tertiary,
-                    ],
-                    transform: const GradientRotation(pi / 4),
-                  ),
-                  borderRadius: BorderRadius.circular(30)),
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.secondary,
+                    Theme.of(context).colorScheme.tertiary,
+                  ],
+                  transform: const GradientRotation(pi / 4),
+                ),
+                borderRadius: BorderRadius.circular(30),
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -292,7 +311,6 @@ class MainScreen extends StatelessWidget {
                     ),
                     child: const Text('Vamos!'),
                   ),
-
                 ],
               ),
             ),

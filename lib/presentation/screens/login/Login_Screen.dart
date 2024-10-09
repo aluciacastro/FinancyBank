@@ -1,6 +1,4 @@
 import 'package:cesarpay/app_view.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cesarpay/presentation/validators/FormValidatorRegister.dart';
 import 'package:cesarpay/presentation/widget/ButtonCustom.dart';
 import 'package:cesarpay/presentation/widget/Inputs.dart';
@@ -10,62 +8,41 @@ import 'package:cesarpay/presentation/widget/RegisterCustom.dart';
 import 'package:cesarpay/presentation/widget/TextCustom.dart';
 import 'package:cesarpay/presentation/widget/Waves.dart';
 import 'package:flutter/material.dart';
+import 'package:cesarpay/domain/controller/ControllerLogin.dart'; // Importa el controlador de login
+import 'package:shared_preferences/shared_preferences.dart'; // Asegúrate de importar SharedPreferences
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   static const String routname = 'Login';
   const LoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
+  State<LoginScreen> createState() => _LoginScreenState();
+}
 
-    // Controladores para capturar los valores de los campos de texto
-    final documentController = TextEditingController();
-    final passwordController = TextEditingController();
+class _LoginScreenState extends State<LoginScreen> {
+  final formKey = GlobalKey<FormState>();
+  final loginLogic = LoginLogic(); // Instancia del controlador de login
 
-    // Lógica de login
-    Future<void> loginWithDocument({
-      required String document,
-      required String password,
-    }) async {
-      try {
-        // Buscar en Firestore el correo asociado al número de documento
-        QuerySnapshot userSnapshot = await FirebaseFirestore.instance
-            .collection('users')
-            .where('document', isEqualTo: document)
-            .limit(1)
-            .get();
+  // Controladores para capturar los valores de los campos de texto
+  final documentController = TextEditingController();
+  final passwordController = TextEditingController();
 
-        // Si el usuario existe
-        if (userSnapshot.docs.isNotEmpty) {
-          // Obtener el email del usuario
-          String email = userSnapshot.docs.first['email'];
+  @override
+  void initState() {
+    super.initState();
+    _loadLastUserDocument();
+  }
 
-          // Autenticar al usuario con Firebase usando el correo y la contraseña
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: email,
-            password: password,
-          );
-
-          // Navega a la pantalla principal después del login exitoso, por ejemplo:
-          // ignore: use_build_context_synchronously
-          Navigator.pushReplacement(
-            // ignore: use_build_context_synchronously
-            context,
-            MaterialPageRoute(builder: (context) => MyAppView(document: document),),);
-
-        } else {
-          throw Exception('Usuario no encontrado con ese número de documento.');
-        }
-      } catch (e) {
-        // Muestra un mensaje de error si el login falla
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al iniciar sesión: $e')),
-        );
-      }
+  Future<void> _loadLastUserDocument() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? lastUserDocument = prefs.getString('lastUserDocument');
+    if (lastUserDocument != null) {
+      documentController.text = lastUserDocument;
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -81,10 +58,10 @@ class LoginScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const CesarPayLogo(topPadding: 50,),
+                    const CesarPayLogo(topPadding: 20),
                     const SizedBox(height: 5),
-                    const CesarPayTitle(title: '', topPadding: 5,),
-                    const SizedBox(height: 40),
+                    const CesarPayTitle(title: '', topPadding: 5),
+                    const SizedBox(height: 5),
                     CustomTextField(
                       controller: documentController,
                       label: 'Documento de Identificación',
@@ -111,10 +88,82 @@ class LoginScreen extends StatelessWidget {
                       text: 'Iniciar Sesión',
                       onPressed: () {
                         if (formKey.currentState?.validate() ?? false) {
-                          loginWithDocument(
+                          loginLogic.loginWithDocument(
                             document: documentController.text.trim(),
                             password: passwordController.text.trim(),
-                          );
+                          ).then((_) async {
+                            // Guardar el último documento en SharedPreferences
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setString('lastUserDocument', documentController.text.trim());
+                            
+                            Navigator.pushReplacement(
+                              // ignore: use_build_context_synchronously
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MyAppView(document: documentController.text.trim()),
+                              ),
+                            );
+                          }).catchError((e) {
+                            // ignore: use_build_context_synchronously
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: $e')),
+                            );
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    FutureBuilder<bool>(
+                      future: loginLogic.canCheckBiometrics(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          if (snapshot.data == true) {
+                            return Center(
+                              child: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.blue, // Fondo azul
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.fingerprint, size: 40, color: Colors.white), // Icono blanco
+                                  onPressed: () async {
+                                    // Verificar si hay un documento almacenado
+                                    final prefs = await SharedPreferences.getInstance();
+                                    String? lastUserDocument = prefs.getString('lastUserDocument');
+
+                                    if (lastUserDocument != null) {
+                                      bool authenticated = await loginLogic.authenticateWithBiometrics();
+                                      if (authenticated) {
+                                        Navigator.pushReplacement(
+                                          // ignore: use_build_context_synchronously
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => MyAppView(document: lastUserDocument),
+                                          ),
+                                        );
+                                      } else {
+                                        // ignore: use_build_context_synchronously
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('Autenticación fallida')),
+                                        );
+                                      }
+                                    } else {
+                                      // Manejar el caso donde no hay documento almacenado
+                                      // ignore: use_build_context_synchronously
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('No hay documento almacenado para la autenticación')),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                            );
+                          } else {
+                            return const SizedBox();
+                          }
+                        } else {
+                          return const CircularProgressIndicator();
                         }
                       },
                     ),

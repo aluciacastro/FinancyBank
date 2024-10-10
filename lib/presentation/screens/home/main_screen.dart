@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:cesarpay/presentation/screens/loan/loanScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -300,7 +301,12 @@ class _MainScreenState extends State<MainScreen> {
                   const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: () {
-                      // Aquí puedes agregar la lógica para navegar a una pantalla de solicitudes de préstamos
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoanScreen(), // Pasa el documento del usuario
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,

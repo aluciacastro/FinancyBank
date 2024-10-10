@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:local_auth/local_auth.dart';
@@ -7,39 +9,42 @@ class LoginLogic {
   final LocalAuthentication auth = LocalAuthentication();
 
   // Método para iniciar sesión con documento y contraseña
-  Future<void> loginWithDocument({
-    required String document,
-    required String password,
-  }) async {
-    try {
-      // Buscar en Firestore el correo asociado al número de documento
-      QuerySnapshot userSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where('document', isEqualTo: document)
-          .limit(1)
-          .get();
+Future<void> loginWithDocument({
+  required String document,
+  required String password,
+}) async {
+  try {
+    // Buscar en Firestore el correo asociado al número de documento
+    QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('document', isEqualTo: document)
+        .limit(1)
+        .get();
 
-      // Si el usuario existe
-      if (userSnapshot.docs.isNotEmpty) {
-        // Obtener el email del usuario
-        String email = userSnapshot.docs.first['email'];
+    // Si el usuario existe
+    if (userSnapshot.docs.isNotEmpty) {
+      // Obtener el email del usuario
+      String email = userSnapshot.docs.first['email'];
 
-        // Autenticar al usuario con Firebase usando el correo y la contraseña
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
+      // Autenticar al usuario con Firebase usando el correo y la contraseña
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-        // Guardar el documento en SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('lastUserDocument', document);
-      } else {
-        throw Exception('Usuario no encontrado con ese número de documento.');
-      }
-    } catch (e) {
-      throw Exception('Error al iniciar sesión: $e');
+      // Guardar el documento en SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('lastUserDocument', document);  // Guarda el documento aquí
+
+      print("Documento guardado en SharedPreferences: $document");
+    } else {
+      throw Exception('Usuario no encontrado con ese número de documento.');
     }
+  } catch (e) {
+    throw Exception('Error al iniciar sesión: $e');
   }
+}
+
 
   // Método para autenticar al usuario con huella digital
   Future<bool> authenticateWithBiometrics() async {

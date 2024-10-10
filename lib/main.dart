@@ -1,4 +1,5 @@
 import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
+import 'package:cesarpay/presentation/screens/loan/loanScreen.dart';
 import 'package:cesarpay/presentation/screens/login/CheckEmail.dart';
 import 'package:cesarpay/presentation/screens/login/Login_Screen.dart';
 import 'package:cesarpay/presentation/screens/login/NewPass.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         '/newpass': (context) => const NewPasswordScreen(),
         '/resetPassword': (context) => const ResetPasswordScreen(),
         '/profile': (context) => const UserProfileScreen(),
+        '/loan': (context) => const LoanScreen(),
       },
     );
   }

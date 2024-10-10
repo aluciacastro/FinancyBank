@@ -8,7 +8,7 @@ class UserModel {
   final String dateOfBirth;
   final String email;
   final String phone;
-  final String? photoUrl; // Agrega photoUrl
+  final String? photoUrl;
 
   UserModel({
     required this.name,
@@ -26,7 +26,7 @@ class UserModel {
       dateOfBirth: map['dateOfBirth'] ?? '',
       email: map['email'] ?? '',
       phone: map['phone'] ?? '',
-      photoUrl: map['photoUrl'], // Asegúrate de que se maneje correctamente
+      photoUrl: map['photoUrl'],
     );
   }
 }
@@ -52,7 +52,7 @@ class UserNotifier extends StateNotifier<UserModel?> {
     required String name,
     required String document,
     required String dateOfBirth,
-    String? photoUrl, // Agregado parámetro photoUrl
+    String? photoUrl, 
   }) async {
     final user = _auth.currentUser;
     if (user != null) {
@@ -65,13 +65,13 @@ class UserNotifier extends StateNotifier<UserModel?> {
       };
 
       if (photoUrl != null) {
-        updateData['photoUrl'] = photoUrl; // Incluye photoUrl solo si está disponible
+        updateData['photoUrl'] = photoUrl; 
       }
 
       await _firestore.collection('users').doc(user.uid).update(updateData);
 
       if (user.email != email) {
-        await user.verifyBeforeUpdateEmail(email); // Usa el nuevo método recomendado
+        await user.verifyBeforeUpdateEmail(email); 
         await sendEmailChangeNotification();
       }
     }

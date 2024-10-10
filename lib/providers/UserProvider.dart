@@ -25,7 +25,7 @@ class UserProvider extends StateNotifier<UserModel?> {
     required String name,
     required String document,
     required String dateOfBirth,
-    String? photoUrl, // Agrega photoUrl
+    String? photoUrl, 
   }) async {
     final user = _auth.currentUser;
     if (user != null) {
@@ -38,13 +38,13 @@ class UserProvider extends StateNotifier<UserModel?> {
       };
 
       if (photoUrl != null) {
-        updateData['photoUrl'] = photoUrl; // Incluye photoUrl solo si está disponible
+        updateData['photoUrl'] = photoUrl; 
       }
 
       await _firestore.collection('users').doc(user.uid).update(updateData);
 
       if (user.email != email) {
-        await user.verifyBeforeUpdateEmail(email); // Usa el nuevo método recomendado
+        await user.verifyBeforeUpdateEmail(email); 
         await sendEmailChangeNotification();
       }
     }

@@ -8,11 +8,11 @@ import 'package:cesarpay/presentation/widget/RegisterCustom.dart';
 import 'package:cesarpay/presentation/widget/TextCustom.dart';
 import 'package:cesarpay/presentation/widget/Waves.dart';
 import 'package:flutter/material.dart';
-import 'package:cesarpay/domain/controller/ControllerLogin.dart'; // Importa el controlador de login
-import 'package:shared_preferences/shared_preferences.dart'; // Asegúrate de importar SharedPreferences
+import 'package:cesarpay/domain/controller/ControllerLogin.dart';
+import 'package:shared_preferences/shared_preferences.dart'; 
 
 class LoginScreen extends StatefulWidget {
-  static const String routname = 'Login';
+  //static const String routname = 'Login';
   const LoginScreen({super.key});
 
   @override
@@ -21,9 +21,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final formKey = GlobalKey<FormState>();
-  final loginLogic = LoginLogic(); // Instancia del controlador de login
+  final loginLogic = LoginLogic();
 
-  // Controladores para capturar los valores de los campos de texto
   final documentController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -92,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             document: documentController.text.trim(),
                             password: passwordController.text.trim(),
                           ).then((_) async {
-                            // Guardar el último documento en SharedPreferences
+                            // Guardar el último documento en cache
                             final prefs = await SharedPreferences.getInstance();
                             await prefs.setString('lastUserDocument', documentController.text.trim());
                             
@@ -123,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 padding: const EdgeInsets.all(8.0),
                                 decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.blue, // Fondo azul
+                                  color: Colors.blue,
                                 ),
                                 child: IconButton(
                                   icon: const Icon(Icons.fingerprint, size: 40, color: Colors.white), // Icono blanco
@@ -149,7 +148,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                         );
                                       }
                                     } else {
-                                      // Manejar el caso donde no hay documento almacenado
                                       // ignore: use_build_context_synchronously
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(content: Text('No hay documento almacenado para la autenticación')),

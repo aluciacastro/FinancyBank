@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'FINANCYBANK',
       debugShowCheckedModeBanner: false,
-      initialRoute: LoginScreen.routname,
+      initialRoute: "/",
       routes: {
         '/': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),

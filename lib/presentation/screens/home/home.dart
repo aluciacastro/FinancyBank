@@ -1,10 +1,13 @@
 import 'package:cesarpay/presentation/formulas/compound_interest_screen.dart';
 import 'package:cesarpay/presentation/formulas/gradient_screen.dart';
+import 'package:cesarpay/presentation/formulas/screen_tirr.dart';
 import 'package:cesarpay/presentation/formulas/simple_interest_screen.dart';
 import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
 import 'package:cesarpay/presentation/screens/home/main_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import '../../formulas/annuities_screen.dart';
 class HomeScreen extends StatefulWidget {
   final String document;
 
@@ -90,6 +93,32 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const GradientScreen(),
+                  ),
+                );
+              },
+            ),
+             ListTile(
+              leading: const Icon(Icons.calendar_today),
+              title: const Text('Anualidades'),
+              onTap: () {
+                Navigator.pop(context); // Cierra el menú
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AnnuitiesScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.assessment),
+              title: const Text('TIR'),
+              onTap: () {
+                Navigator.pop(context); // Cierra el menú
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TirScreen(),
                   ),
                 );
               },

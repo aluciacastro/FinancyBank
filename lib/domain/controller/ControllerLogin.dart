@@ -1,7 +1,8 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -44,7 +45,28 @@ Future<void> loginWithDocument({
     throw Exception('Error al iniciar sesión: $e');
   }
 }
+// Método para hacer logout
+  Future<void> logout(BuildContext context) async {
+    try {
+      // Cerrar sesión en Firebase
+      await FirebaseAuth.instance.signOut();
 
+      // Borrar datos de SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear(); // Esto borra todas las preferencias almacenadas
+
+      // Redirigir a la pantalla de login y eliminar el historial de navegación
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/login',  // Aquí coloca la ruta de tu pantalla de login
+        (Route<dynamic> route) => false, // Esto elimina todas las rutas anteriores
+      );
+    } catch (e) {
+      print('Error al cerrar sesión: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al cerrar sesión: $e')),
+      );
+    }
+  }
 
   // Método para autenticar al usuario con huella digital
   Future<bool> authenticateWithBiometrics() async {

@@ -30,6 +30,7 @@ dependencies:
   firebase_storage: ^12.2.0
   local_auth: ^2.3.0
   shared_preferences: ^2.3.2
+  finance_updated: ^0.1.0
 
 dev_dependencies:
   flutter_test:

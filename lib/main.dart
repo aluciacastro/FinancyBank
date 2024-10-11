@@ -1,3 +1,4 @@
+import 'package:cesarpay/presentation/screens/home/ConsigScreen.dart';
 import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
 import 'package:cesarpay/presentation/screens/loan/loanScreen.dart';
 import 'package:cesarpay/presentation/screens/login/CheckEmail.dart';
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
         '/resetPassword': (context) => const ResetPasswordScreen(),
         '/profile': (context) => const UserProfileScreen(),
         '/loan': (context) => const LoanScreen(),
+        '/consig': (context) => const ConsignarScreen(),
       },
     );
   }

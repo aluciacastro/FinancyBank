@@ -256,7 +256,7 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Revisa tu estado actual para solicitudes de prestamos!!!',
+                        'Revisa si eres apto para solicitar tu prestamo!!!',
                         style: TextStyle(
                           fontSize: 14,
                           color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
@@ -347,7 +347,7 @@ class _MainScreenState extends State<MainScreen> {
                                     },
                                   ),
                                 ),
-                                const SizedBox(height: 8), // Espacio entre el ícono y el texto
+                                const SizedBox(height: 8), 
                                 const Text(
                                   'Consignar',
                                   style: TextStyle(
@@ -382,7 +382,7 @@ class _MainScreenState extends State<MainScreen> {
                                     },
                                   ),
                                 ),
-                                const SizedBox(height: 8), // Espacio entre el ícono y el texto
+                                const SizedBox(height: 8),
                                 const Text(
                                   'Pagar',
                                   style: TextStyle(
@@ -417,7 +417,7 @@ class _MainScreenState extends State<MainScreen> {
                                     },
                                   ),
                                 ),
-                                const SizedBox(height: 8), // Espacio entre el ícono y el texto
+                                const SizedBox(height: 8),
                                 const Text(
                                   'Retirar',
                                   style: TextStyle(

@@ -112,7 +112,7 @@ class _ConsignarScreenState extends State<ConsignarScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Formulario de Consignación',
+              'Rellene todos los campos',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),

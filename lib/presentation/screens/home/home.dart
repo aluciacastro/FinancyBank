@@ -1,7 +1,9 @@
+import 'package:cesarpay/presentation/formulas/amortization_screen.dart';
 import 'package:cesarpay/presentation/formulas/compound_interest_screen.dart';
 import 'package:cesarpay/presentation/formulas/gradient_screen.dart';
 import 'package:cesarpay/presentation/formulas/screen_tirr.dart';
 import 'package:cesarpay/presentation/formulas/simple_interest_screen.dart';
+import 'package:cesarpay/presentation/formulas/uvr_screen.dart';
 import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
 import 'package:cesarpay/presentation/screens/home/main_screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -106,6 +108,32 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const AnnuitiesScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.align_vertical_bottom_rounded),
+              title: const Text('Amortizacion'),
+              onTap: () {
+                Navigator.pop(context); // Cierra el menú
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AmortizationScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.attach_money_sharp),
+              title: const Text('UVR'),
+              onTap: () {
+                Navigator.pop(context); // Cierra el menú
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const UVRScreen(),
                   ),
                 );
               },

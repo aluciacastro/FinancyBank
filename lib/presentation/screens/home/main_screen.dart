@@ -2,6 +2,7 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'dart:math';
+import 'package:cesarpay/presentation/screens/home/retiroScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cesarpay/presentation/screens/home/ConsigScreen.dart';
@@ -413,7 +414,12 @@ class _MainScreenState extends State<MainScreen> {
                                       color: Colors.white,
                                     ),
                                     onPressed: () {
-                                      // Acción para el botón de retirar
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => const RetiroScreen(),
+                                        ),
+                                      );
                                     },
                                   ),
                                 ),

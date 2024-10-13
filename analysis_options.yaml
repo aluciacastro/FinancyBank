@@ -2,6 +2,7 @@
 analyzer:
   errors:
     file_names: ignore
+    prefer_interpolation_to_compose_strings: ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:

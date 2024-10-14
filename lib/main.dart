@@ -8,6 +8,7 @@ import 'package:cesarpay/presentation/screens/login/NewPass.dart';
 import 'package:cesarpay/presentation/screens/login/PassworrdRecovery.dart';
 import 'package:cesarpay/presentation/screens/login/Register_Screen.dart';
 import 'package:cesarpay/presentation/screens/login/ResetPass.dart';
+import 'package:cesarpay/presentation/screens/splash/splashScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,8 +33,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'FINANCYBANK',
       debugShowCheckedModeBanner: false,
-      initialRoute: "/login",
+      initialRoute: "/splash",
       routes: {
+        '/splash':(context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/password': (context) => const PasswordRecoveryScreen(),

@@ -1,110 +1,201 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member, unused_local_variable, no_leading_underscores_for_local_identifiers
 
+import 'package:cesarpay/providers/amortizacion/amortization_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cesarpay/domain/controller/ControllerLoan.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cesarpay/presentation/widget/shared/custom_background.dart';
+import 'package:cesarpay/presentation/widget/shared/custom_filled_button.dart';
+import 'package:cesarpay/presentation/widget/shared/custom_dropdown_menu.dart';
 
-class LoanScreen extends StatefulWidget {
+class LoanScreen extends ConsumerWidget {
   const LoanScreen({super.key});
 
-  @override
-  _LoanScreenState createState() => _LoanScreenState();
-}
+  void _requestLoan(WidgetRef ref, String document, double loanAmount, String selectedInterestType, int selectedInstallments) async {
+    final ControllerLoan controllerLoan = ControllerLoan(FirebaseFirestore.instance);
+    String _message = "";
 
-class _LoanScreenState extends State<LoanScreen> {
-  final TextEditingController _documentController = TextEditingController();
-  final TextEditingController _loanAmountController = TextEditingController();
-  String _selectedInterestType = 'Simple';
-  final ControllerLoan _controllerLoan = ControllerLoan(FirebaseFirestore.instance);
-  String _message = "";
-
-  void _requestLoan() async {
-    final document = _documentController.text.trim();
-    final loanAmount = double.tryParse(_loanAmountController.text.trim()) ?? 0;
-
-    // Verificar la elegibilidad primero
-    final eligibilityMessage = await _controllerLoan.checkEligibility(document);
-    
+    // Comprobamos si es apto para solicitar el préstamo
+    final eligibilityMessage = await controllerLoan.checkEligibility(document);
     if (eligibilityMessage.startsWith("Eres apto")) {
-      final requestMessage = await _controllerLoan.requestLoan(document, loanAmount, _selectedInterestType);
-      setState(() {
-        _message = requestMessage;
-      });
+      // Establecemos los valores para el cálculo de la amortización
+      ref.read(amortizationProvider.notifier).onCapitalChanged(loanAmount);
+      ref.read(amortizationProvider.notifier).onInterestRateChanged(5.0); // Tasa de interés predeterminada al 5%
+      ref.read(amortizationProvider.notifier).onPeriodsChanged(selectedInstallments);
+      ref.read(amortizationProvider.notifier).onAmortizationTypeChanged(selectedInterestType);
+      
+      // Calculamos la amortización
+      ref.read(amortizationProvider.notifier).calculateAmortization();
+      
+      // Guardamos la solicitud de préstamo
+      await controllerLoan.requestLoan(document, loanAmount, selectedInterestType, ref.read(amortizationProvider).payments);
+
+      // Almacenamos los pagos en Firestore
+      await _storePaymentsInFirestore(document, ref.read(amortizationProvider).payments);
+      
+      // Indicamos que el formulario fue enviado
+      ref.read(amortizationProvider.notifier).state = ref.read(amortizationProvider).copyWith(isFormPosted: true, message: 'Préstamo solicitado con éxito. Las cuotas han sido calculadas y almacenadas.');
     } else {
-      setState(() {
-        _message = eligibilityMessage;
+      // Mostrar el mensaje de error
+      _message = eligibilityMessage;
+      ref.read(amortizationProvider.notifier).state = ref.read(amortizationProvider).copyWith(isFormPosted: false, message: _message);
+    }
+  }
+
+  Future<void> _storePaymentsInFirestore(String document, List<Map<String, double>> payments) async {
+    final collectionRef = FirebaseFirestore.instance.collection('loan_payments');
+    for (var payment in payments) {
+      await collectionRef.add({
+        'document': document,
+        'cuota': payment['cuota'] ?? 0,
+        'interes': payment['interes'] ?? 0,
+        'amortizacion': payment['amortizacion'] ?? 0,
       });
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final documentController = TextEditingController();
+    final loanAmountController = TextEditingController();
+    
+    // Usa el estado de Riverpod para mantener el tipo de amortización
+    final amortizationState = ref.watch(amortizationProvider);
+    String selectedInterestType = amortizationState.amortizationType; // Obtenemos el tipo de amortización actual
+    int selectedInstallments = 12; // Valor por defecto
+
     return Scaffold(
       appBar: AppBar(title: const Text('Solicitar Préstamo')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _documentController,
-              decoration: const InputDecoration(
-                labelText: 'Número de documento',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      body: CustomBackground(
+        height: 200,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("Solicitar Préstamo", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                const Divider(
+                  color: Color.fromARGB(255, 0, 140, 255),
+                  thickness: 5,
+                  indent: 50,
+                  endIndent: 50,
+                ),
+                const SizedBox(height: 16),
+                // Mensaje de selección
+                const SizedBox(height: 20),
+                const Text("Selecciona el tipo de amortización:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                
+                // Menú desplegable para tipo de amortización
+                CustomDropDownMenu(
+                  hintText: "Seleccionar",
+                  options: const {'Francesa': 'Francesa', 'Alemana': 'Alemana', 'Americana': 'Americana'},
+                  onSelected: (value) {
+                    ref.read(amortizationProvider.notifier).onAmortizationTypeChanged(value!);
+                  },
+                  errorText: amortizationState.isFormPosted && amortizationState.amortizationType.isEmpty
+                      ? "Seleccione un tipo de amortización"
+                      : null,
+                ),
+                const SizedBox(height: 20),
+                // Campo para número de documento
+                TextField(
+                  controller: documentController,
+                  decoration: const InputDecoration(
+                    labelText: 'Número de documento',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                ),
+                const SizedBox(height: 16),
+                // Campo para valor del préstamo
+                TextField(
+                  controller: loanAmountController,
+                  decoration: const InputDecoration(
+                    labelText: 'Valor del préstamo',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                ),
+                
+                const SizedBox(height: 16),
+                // Menú desplegable para número de cuotas
+                DropdownButton<int>(
+                  value: selectedInstallments,
+                  items: const [
+                    DropdownMenuItem(value: 6, child: Text('6 cuotas')),
+                    DropdownMenuItem(value: 12, child: Text('12 cuotas')),
+                    DropdownMenuItem(value: 24, child: Text('24 cuotas')),
+                    DropdownMenuItem(value: 36, child: Text('36 cuotas')),
+                  ],
+                  onChanged: (value) {
+                    selectedInstallments = value ?? 12;
+                  },
+                ),
+                const SizedBox(height: 16),
+                // Botón para solicitar préstamo
+                SizedBox(
+                  width: double.infinity,
+                  height: 40,
+                  child: CustomFilledButton(
+                    onPressed: () {
+                      final document = documentController.text.trim();
+                      final loanAmount = double.tryParse(loanAmountController.text.trim()) ?? 0;
+                      _requestLoan(ref, document, loanAmount, amortizationState.amortizationType, selectedInstallments);
+                    },
+                    buttonColor: const Color.fromARGB(255, 0, 140, 255),
+                    child: const Text('Solicitar Préstamo'),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Mensaje de respuesta
+                Text(
+                  amortizationState.message,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                // Listado de pagos calculados
+                if (amortizationState.payments.isNotEmpty) ...[
+                  const Text(
+                    "Detalles de los pagos:",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    height: 200, // Ajusta esta altura según la necesidad
+                    child: ListView.builder(
+                      shrinkWrap: true, // Permite que el ListView funcione correctamente en Column
+                      itemCount: amortizationState.payments.length,
+                      itemBuilder: (context, index) {
+                        final payment = amortizationState.payments[index];
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Pago ${index + 1}:",
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            // Usamos toStringAsFixed(2) para mostrar 2 decimales
+                            Text("Cuota: ${payment['cuota']!.toStringAsFixed(2)}", style: const TextStyle(color: Colors.black)),
+                            Text("Interés: ${payment['interes']!.toStringAsFixed(2)}", style: const TextStyle(color: Colors.black)),
+                            Text("Amortización: ${payment['amortizacion']!.toStringAsFixed(2)}", style: const TextStyle(color: Colors.black)),
+                            const SizedBox(height: 6),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _loanAmountController,
-              decoration: const InputDecoration(
-                labelText: 'Valor del préstamo',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _selectedInterestType,
-              items: [
-                'Simple',
-                'Compuesto',
-                'Gradiente Aritmético',
-                'Gradiente Geométrico',
-                'Amortización Alemana',
-                'Amortización Francesa',
-                'Amortización Americana',
-              ].map((type) {
-                return DropdownMenuItem(
-                  value: type,
-                  child: Text(type),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedInterestType = value ?? 'Simple';
-                });
-              },
-              decoration: const InputDecoration(
-                labelText: 'Tipo de interés',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _requestLoan,
-              child: const Text('Solicitar Préstamo'),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              _message,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -11,16 +11,18 @@ class AmortizationFormState {
   final double interestRate;
   final int periods;
   final String amortizationType;
-  final String result;
+  final List<Map<String, double>> payments; // Detalles de cada pago
   final bool isFormPosted;
+  final String message; // Agregar un campo para el mensaje
 
   AmortizationFormState({
     this.capital = 0,
     this.interestRate = 0,
     this.periods = 0,
     this.amortizationType = 'Francesa',
-    this.result = '',
+    this.payments = const [],  // Inicializado como lista vacía
     this.isFormPosted = false,
+    this.message = '', // Inicializar el mensaje como una cadena vacía
   });
 
   AmortizationFormState copyWith({
@@ -28,16 +30,18 @@ class AmortizationFormState {
     double? interestRate,
     int? periods,
     String? amortizationType,
-    String? result,
+    List<Map<String, double>>? payments,
     bool? isFormPosted,
+    String? message, // Permitir que el mensaje sea opcional en copyWith
   }) {
     return AmortizationFormState(
       capital: capital ?? this.capital,
       interestRate: interestRate ?? this.interestRate,
       periods: periods ?? this.periods,
       amortizationType: amortizationType ?? this.amortizationType,
-      result: result ?? this.result,
+      payments: payments ?? this.payments,
       isFormPosted: isFormPosted ?? this.isFormPosted,
+      message: message ?? this.message, // Usar el mensaje anterior si no se proporciona uno nuevo
     );
   }
 }
@@ -50,30 +54,43 @@ class AmortizationNotifier extends StateNotifier<AmortizationFormState> {
         super(AmortizationFormState());
 
   void onCapitalChanged(double capital) {
-    state = state.copyWith(capital: capital);
+    state = state.copyWith(capital: capital, message: ''); // Actualizar el mensaje si es necesario
   }
 
   void onInterestRateChanged(double rate) {
-    state = state.copyWith(interestRate: rate);
+    state = state.copyWith(interestRate: rate, message: ''); // Actualizar el mensaje si es necesario
   }
 
   void onPeriodsChanged(int periods) {
-    state = state.copyWith(periods: periods);
+    state = state.copyWith(periods: periods, message: ''); // Actualizar el mensaje si es necesario
   }
 
   void onAmortizationTypeChanged(String type) {
-    state = state.copyWith(amortizationType: type);
+    state = state.copyWith(amortizationType: type, message: ''); // Actualizar el mensaje si es necesario
   }
 
   void calculateAmortization() {
-    double result;
+    List<AmortizationPayment> amortizationPayments;
+
+    // Determina el tipo de amortización
     if (state.amortizationType == 'Francesa') {
-      result = _repository.calculateFrenchAmortization(state.capital, state.interestRate, state.periods);
+      amortizationPayments = _repository.calculateFrenchAmortization(state.capital, state.interestRate, state.periods);
     } else if (state.amortizationType == 'Alemana') {
-      result = _repository.calculateGermanAmortization(state.capital, state.interestRate, state.periods);
+      amortizationPayments = _repository.calculateGermanAmortization(state.capital, state.interestRate, state.periods);
     } else {
-      result = _repository.calculateAmericanAmortization(state.capital, state.interestRate, state.periods);
+      amortizationPayments = _repository.calculateAmericanAmortization(state.capital, state.interestRate, state.periods);
     }
-    state = state.copyWith(result: result.toString(), isFormPosted: true);
+    
+    // Convierte los pagos de AmortizationPayment a Map<String, double>
+    List<Map<String, double>> payments = amortizationPayments.map((payment) {
+      return {
+        'cuota': payment.cuota,
+        'interes': payment.interes,
+        'amortizacion': payment.amortizacion,
+      };
+    }).toList();
+
+    // Actualiza el estado
+    state = state.copyWith(payments: payments, isFormPosted: true, message: ''); // Puedes actualizar el mensaje según sea necesario
   }
 }

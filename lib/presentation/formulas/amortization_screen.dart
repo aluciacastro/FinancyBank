@@ -1,13 +1,13 @@
 // ignore_for_file: sort_child_properties_last
 
-import 'package:cesarpay/presentation/widget/shared/custom_background.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/amortizacion/amortization_provider.dart';
+import '../widget/shared/custom_background.dart';
 import '../widget/shared/custom_dropdown_menu.dart';
-import '../widget/shared/custom_text_form_field.dart';
 import '../widget/shared/custom_filled_button.dart';
-
+import '../widget/shared/custom_text_form_field.dart';
+import '../widget/shared/header.dart'; 
 class AmortizationScreen extends ConsumerWidget {
   const AmortizationScreen({super.key});
 
@@ -25,7 +25,7 @@ class AmortizationScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Amortización", style: textStyles.titleLarge),
+              const Header(), 
               const Divider(
                 color: Color.fromARGB(255, 0, 140, 255),
                 thickness: 5,
@@ -93,21 +93,37 @@ class AmortizationScreen extends ConsumerWidget {
               if (amortizationForm.isFormPosted)
                 Container(
                   padding: const EdgeInsets.all(10),
-                  width: double.infinity - 30,
-                  height: 100,
+                  width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color: const Color.fromARGB(255, 0, 140, 255),
                   ),
-                  child: Column(
-                    children: [
-                      const Text("RESULTADO:", style: TextStyle(color: Colors.white)),
-                      const SizedBox(height: 6),
-                      Text(
-                        "El resultado es: ${amortizationForm.result}",
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ],
+                  child: SizedBox(
+                    height: 200, // Ajusta esta altura según la necesidad
+                    child: ListView.builder(
+                      shrinkWrap: true, // Permite que el ListView funcione correctamente en Column
+                      itemCount: amortizationForm.payments.length,
+                      itemBuilder: (context, index) {
+                        final payment = amortizationForm.payments[index];
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Pago ${index + 1}:",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            // Usamos toStringAsFixed(2) para mostrar 2 decimales
+                            Text("Cuota: ${payment['cuota']!.toStringAsFixed(2)}", style: const TextStyle(color: Colors.white)),
+                            Text("Interés: ${payment['interes']!.toStringAsFixed(2)}", style: const TextStyle(color: Colors.white)),
+                            Text("Amortización: ${payment['amortizacion']!.toStringAsFixed(2)}", style: const TextStyle(color: Colors.white)),
+                            const SizedBox(height: 6),
+                            ],
+                        );
+                      },
+                    ),
                   ),
                 ),
             ],

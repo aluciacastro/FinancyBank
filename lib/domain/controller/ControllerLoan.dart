@@ -58,43 +58,64 @@ class ControllerLoan {
       if (!data.containsKey('debt')) {
         await userDoc.reference.set({'debt': 0}, SetOptions(merge: true));
       }
-    }
-  }
-
-  Future<String> requestLoan(String document, double loanAmount, String interestType) async {
-    try {
-      QuerySnapshot userSnapshot = await _firestore
-          .collection('users')
-          .where('document', isEqualTo: document)
-          .limit(1)
-          .get();
-
-      if (userSnapshot.docs.isNotEmpty) {
-        final userDoc = userSnapshot.docs.first;
-        final data = userDoc.data() as Map<String, dynamic>?;
-
-        // Verificar campos
-        await _ensureFieldsExist(userDoc);
-        final hasActiveLoan = data?['hasActiveLoan'] ?? false;
-
-        if (!hasActiveLoan) {
-          // Crear el préstamo y establecer 'hasActiveLoan' a true
-          await userDoc.reference.set({
-            'hasActiveLoan': true,
-            'loanAmount': loanAmount,
-            'interestType': interestType,
-            'debt': loanAmount // Asignamos la deuda inicial al monto del préstamo
-          }, SetOptions(merge: true));
-
-          return "Préstamo solicitado exitosamente.";
-        } else {
-          return "Ya tienes un préstamo activo.";
-        }
-      } else {
-        return "Usuario no encontrado.";
+      // Agregar campos para almacenar cuotas e interés
+      if (!data.containsKey('installments')) {
+        await userDoc.reference.set({'installments': []}, SetOptions(merge: true));
       }
-    } catch (e) {
-      return "Error al solicitar el préstamo: $e";
+      if (!data.containsKey('interest')) {
+        await userDoc.reference.set({'interest': 0.0}, SetOptions(merge: true));
+      }
     }
   }
+
+  Future<String> requestLoan(String document, double loanAmount, String interestType, List<Map<String, dynamic>> payments) async {
+  try {
+    QuerySnapshot userSnapshot = await _firestore
+        .collection('users')
+        .where('document', isEqualTo: document)
+        .limit(1)
+        .get();
+
+    if (userSnapshot.docs.isNotEmpty) {
+      final userDoc = userSnapshot.docs.first;
+      final data = userDoc.data() as Map<String, dynamic>?;
+
+      // Verificar campos
+      await _ensureFieldsExist(userDoc);
+      final hasActiveLoan = data?['hasActiveLoan'] ?? false;
+
+      if (!hasActiveLoan) {
+        // Crear el préstamo y establecer 'hasActiveLoan' a true
+        await userDoc.reference.set({
+          'hasActiveLoan': true,
+          'loanAmount': loanAmount,
+          'interestType': interestType,
+          'debt': loanAmount // Asignamos la deuda inicial al monto del préstamo
+        }, SetOptions(merge: true));
+
+        // Aquí puedes guardar las cuotas
+        await _storePayments(payments, userDoc.reference); // Método que almacena los pagos
+
+        return "Préstamo solicitado exitosamente.";
+      } else {
+        return "Ya tienes un préstamo activo.";
+      }
+    } else {
+      return "Usuario no encontrado.";
+    }
+  } catch (e) {
+    return "Error al solicitar el préstamo: $e";
+  }
+}
+
+// Método auxiliar para almacenar pagos
+Future<void> _storePayments(List<Map<String, dynamic>> payments, DocumentReference userDocRef) async {
+  final collectionRef = FirebaseFirestore.instance.collection('loan_payments');
+  for (var payment in payments) {
+    await collectionRef.add({
+      'document': userDocRef.id,
+      ...payment,
+    });
+  }
+}
 }

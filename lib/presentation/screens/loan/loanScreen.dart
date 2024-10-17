@@ -14,56 +14,60 @@ class LoanScreen extends ConsumerWidget {
   const LoanScreen({super.key});
 
   void _requestLoan(WidgetRef ref, String document, double loanAmount, String selectedInterestType, int selectedInstallments) async {
-    final ControllerLoan controllerLoan = ControllerLoan(FirebaseFirestore.instance);
-    String _message = "";
+  final ControllerLoan controllerLoan = ControllerLoan(FirebaseFirestore.instance);
+  String _message = "";
 
-    // Comprobamos si es apto para solicitar el préstamo
-    final eligibilityMessage = await controllerLoan.checkEligibility(document);
-    if (eligibilityMessage.startsWith("Eres apto")) {
-      // Establecemos los valores para el cálculo de la amortización
-      ref.read(amortizationProvider.notifier).onCapitalChanged(loanAmount);
-      ref.read(amortizationProvider.notifier).onInterestRateChanged(5.0); // Tasa de interés predeterminada al 5%
-      ref.read(amortizationProvider.notifier).onPeriodsChanged(selectedInstallments);
-      ref.read(amortizationProvider.notifier).onAmortizationTypeChanged(selectedInterestType);
-      
-      // Calculamos la amortización
-      ref.read(amortizationProvider.notifier).calculateAmortization();
-      
-      // Guardamos la solicitud de préstamo
-      await controllerLoan.requestLoan(document, loanAmount, selectedInterestType, ref.read(amortizationProvider).payments);
+  final eligibilityMessage = await controllerLoan.checkEligibility(document);
+  if (eligibilityMessage.startsWith("Eres apto")) {
+    ref.read(amortizationProvider.notifier).onCapitalChanged(loanAmount);
+    ref.read(amortizationProvider.notifier).onInterestRateChanged(5.0);
+    ref.read(amortizationProvider.notifier).onPeriodsChanged(selectedInstallments);
+    ref.read(amortizationProvider.notifier).onAmortizationTypeChanged(selectedInterestType);
 
-      // Almacenamos los pagos en Firestore
-      await _storePaymentsInFirestore(document, ref.read(amortizationProvider).payments);
-      
-      // Indicamos que el formulario fue enviado
-      ref.read(amortizationProvider.notifier).state = ref.read(amortizationProvider).copyWith(isFormPosted: true, message: 'Préstamo solicitado con éxito. Las cuotas han sido calculadas y almacenadas.');
-    } else {
-      // Mostrar el mensaje de error
-      _message = eligibilityMessage;
-      ref.read(amortizationProvider.notifier).state = ref.read(amortizationProvider).copyWith(isFormPosted: false, message: _message);
-    }
+    ref.read(amortizationProvider.notifier).calculateAmortization();
+    
+    // Imprime los pagos calculados para verificar el formato
+    final payments = ref.read(amortizationProvider).payments;
+  
+    
+    await controllerLoan.requestLoan(document, loanAmount, selectedInterestType, payments);
+    await _storePaymentsInFirestore(document, payments);
+    
+    ref.read(amortizationProvider.notifier).state = ref.read(amortizationProvider).copyWith(isFormPosted: true, message: 'Préstamo solicitado con éxito. Las cuotas han sido calculadas y almacenadas.');
+  } else {
+    _message = eligibilityMessage;
+    ref.read(amortizationProvider.notifier).state = ref.read(amortizationProvider).copyWith(isFormPosted: false, message: _message);
   }
+}
+
 
   Future<void> _storePaymentsInFirestore(String document, List<Map<String, double>> payments) async {
-    final collectionRef = FirebaseFirestore.instance.collection('loan_payments');
-    for (var payment in payments) {
-      await collectionRef.add({
-        'document': document,
-        'cuota': payment['cuota'] ?? 0,
-        'interes': payment['interes'] ?? 0,
-        'amortizacion': payment['amortizacion'] ?? 0,
-      });
-    }
+  final collectionRef = FirebaseFirestore.instance.collection('loan_payments');
+  
+  for (int i = 0; i < payments.length; i++) {
+    var payment = payments[i];
+    
+     
+    await collectionRef.add({
+      'document': document,
+      'Pago': i + 1,
+      'Cuota': payment['cuota']?.toStringAsFixed(2) ?? '0.00',
+      'Interés': payment['interes']?.toStringAsFixed(2) ?? '0.00',
+      'Amortización': payment['amortizacion']?.toStringAsFixed(2) ?? '0.00',
+    });
   }
+}
+
+
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final documentController = TextEditingController();
     final loanAmountController = TextEditingController();
     
-    // Usa el estado de Riverpod para mantener el tipo de amortización
+    
     final amortizationState = ref.watch(amortizationProvider);
-    String selectedInterestType = amortizationState.amortizationType; // Obtenemos el tipo de amortización actual
+    String selectedInterestType = amortizationState.amortizationType; 
     int selectedInstallments = 12; // Valor por defecto
 
     return Scaffold(
@@ -133,7 +137,7 @@ class LoanScreen extends ConsumerWidget {
                     DropdownMenuItem(value: 36, child: Text('36 cuotas')),
                   ],
                   onChanged: (value) {
-                    selectedInstallments = value ?? 12;
+                    selectedInstallments = value !;
                   },
                 ),
                 const SizedBox(height: 16),

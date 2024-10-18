@@ -64,11 +64,9 @@ class LoanScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final documentController = TextEditingController();
     final loanAmountController = TextEditingController();
-    
-    
     final amortizationState = ref.watch(amortizationProvider);
     String selectedInterestType = amortizationState.amortizationType; 
-    int selectedInstallments = 12; // Valor por defecto
+    final installmentsController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Solicitar Préstamo')),
@@ -126,19 +124,15 @@ class LoanScreen extends ConsumerWidget {
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
                 
-                const SizedBox(height: 16),
-                // Menú desplegable para número de cuotas
-                DropdownButton<int>(
-                  value: selectedInstallments,
-                  items: const [
-                    DropdownMenuItem(value: 6, child: Text('6 cuotas')),
-                    DropdownMenuItem(value: 12, child: Text('12 cuotas')),
-                    DropdownMenuItem(value: 24, child: Text('24 cuotas')),
-                    DropdownMenuItem(value: 36, child: Text('36 cuotas')),
-                  ],
-                  onChanged: (value) {
-                    selectedInstallments = value !;
-                  },
+                 const SizedBox(height: 16),
+                TextField(
+                  controller: installmentsController, // Campo para número de cuotas
+                  decoration: const InputDecoration(
+                    labelText: 'Número de cuotas',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
                 const SizedBox(height: 16),
                 // Botón para solicitar préstamo
@@ -149,6 +143,7 @@ class LoanScreen extends ConsumerWidget {
                     onPressed: () {
                       final document = documentController.text.trim();
                       final loanAmount = double.tryParse(loanAmountController.text.trim()) ?? 0;
+                      final selectedInstallments = int.tryParse(installmentsController.text.trim()) ?? 0;
                       _requestLoan(ref, document, loanAmount, amortizationState.amortizationType, selectedInstallments);
                     },
                     buttonColor: const Color.fromARGB(255, 0, 140, 255),

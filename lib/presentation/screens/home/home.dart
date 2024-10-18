@@ -1,6 +1,8 @@
+import 'package:cesarpay/presentation/formulas/InvestmentEvaluationScreen.dart';
 import 'package:cesarpay/presentation/formulas/amortization_screen.dart';
 import 'package:cesarpay/presentation/formulas/compound_interest_screen.dart';
 import 'package:cesarpay/presentation/formulas/gradient_screen.dart';
+import 'package:cesarpay/presentation/formulas/inflation_Screen.dart';
 import 'package:cesarpay/presentation/formulas/screen_tirr.dart';
 import 'package:cesarpay/presentation/formulas/simple_interest_screen.dart';
 import 'package:cesarpay/presentation/formulas/uvr_screen.dart';
@@ -55,7 +57,8 @@ class _HomeScreenState extends State<HomeScreen> {
       borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
     ),
     builder: (context) {
-      return Container(
+      return SingleChildScrollView( 
+      child:  Container(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -99,6 +102,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.trending_up),
+              title: const Text('Inflation'),
+              onTap: () {
+                Navigator.pop(context); // Cierra el menú
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const InflationScreen(),
+                  ),
+                );
+              },
+            ),
              ListTile(
               leading: const Icon(Icons.calendar_today),
               title: const Text('Anualidades'),
@@ -108,6 +124,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const AnnuitiesScreen(),
+                  ),
+                );
+              },
+            ),
+             ListTile(
+              leading: const Icon(Icons.attach_money),
+              title: const Text('Alternativas de Inversion'),
+              onTap: () {
+                Navigator.pop(context); // Cierra el menú
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const InvestmentEvaluationScreen(),
                   ),
                 );
               },
@@ -126,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.attach_money_sharp),
+              leading: const Icon(Icons.monetization_on),
               title: const Text('UVR'),
               onTap: () {
                 Navigator.pop(context); // Cierra el menú
@@ -153,6 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+       ),
       );
     },
   );

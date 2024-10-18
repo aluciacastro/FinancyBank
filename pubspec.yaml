@@ -49,4 +49,6 @@ flutter:
     assets:
       - assets/images/
       - assets/lottie/Animation - 1728923557795.json
+      - assets/lottie/Retiro_Animation.json
+      - assets/lottie/Consign_Animation.json
 

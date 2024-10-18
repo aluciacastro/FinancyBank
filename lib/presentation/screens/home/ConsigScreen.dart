@@ -1,8 +1,10 @@
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, avoid_print
+// ignore_for_file: avoid_print, library_private_types_in_public_api
 
 import 'package:cesarpay/domain/controller/ControllerConsign.dart';
+import 'package:cesarpay/presentation/widget/shared/custom_background.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lottie/lottie.dart';
 
 class ConsignarScreen extends StatefulWidget {
   const ConsignarScreen({super.key});
@@ -14,14 +16,13 @@ class ConsignarScreen extends StatefulWidget {
 class _ConsignarScreenState extends State<ConsignarScreen> {
   final TextEditingController documentoDestinatarioController = TextEditingController();
   final TextEditingController montoController = TextEditingController();
-  final ControllerConsign _controllerConsign = ControllerConsign(); // Instancia de tu controlador
+  final ControllerConsign _controllerConsign = ControllerConsign();
   bool _isLoading = false;
 
   Future<void> _consignar() async {
     String destinatarioDoc = documentoDestinatarioController.text;
     String monto = montoController.text;
 
-    // Obtener el documento del consignante desde SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     String? consignanteDoc = prefs.getString('lastUserDocument');
 
@@ -30,7 +31,6 @@ class _ConsignarScreenState extends State<ConsignarScreen> {
       return;
     }
 
-    // Verificar si el usuario intenta consignarse a sí mismo
     if (destinatarioDoc == consignanteDoc) {
       _showAlert('Error', 'No puedes consignarte a ti mismo.');
       return;
@@ -46,7 +46,6 @@ class _ConsignarScreenState extends State<ConsignarScreen> {
     });
 
     try {
-      // Realizar consignación
       String resultado = await _controllerConsign.consignar(
         consignanteDoc,
         destinatarioDoc,
@@ -54,8 +53,7 @@ class _ConsignarScreenState extends State<ConsignarScreen> {
       );
       print('Resultado de la consignación: $resultado');
 
-      // Mostrar alerta con el resultado
-      _showAlert('Alerta', resultado.contains('exitoso') ? resultado : 'Error: $resultado');
+      _showAlert('Alerta', resultado.contains('exitosa') ? resultado : 'Error: $resultado');
     } catch (e) {
       _showAlert('Error', 'Error al realizar la consignación: $e');
     } finally {
@@ -91,42 +89,61 @@ class _ConsignarScreenState extends State<ConsignarScreen> {
       appBar: AppBar(
         title: const Text('Consignar'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Rellene todos los campos',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: documentoDestinatarioController,
-              decoration: const InputDecoration(
-                labelText: 'Número de Documento Destinatario',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: montoController,
-              decoration: const InputDecoration(
-                labelText: 'Monto a Consignar',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            ),
-            const SizedBox(height: 20),
-            _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : ElevatedButton(
-                    onPressed: _consignar,
-                    child: const Text('Consignar'),
+      body: Stack(
+        children: [
+          const WaveBackground(),
+
+          SingleChildScrollView( // Añadir SingleChildScrollView aquí
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              //crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                Center(
+                  child: Lottie.asset(
+                    'assets/lottie/Consign_Animation.json',
+                    width: 170,
+                    height: 200,
+                    fit: BoxFit.fill,
+                    repeat: false,
                   ),
-          ],
-        ),
+                ),
+                const Text(
+                  'Rellene todos los campos',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 30),
+                TextField(
+                  controller: documentoDestinatarioController,
+                  decoration: const InputDecoration(
+                    labelText: 'Número de Documento Destinatario',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: montoController,
+                  decoration: const InputDecoration(
+                    labelText: 'Monto a Consignar',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                ),
+                const SizedBox(height: 20),
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
+                        onPressed: _consignar,
+                        child: const Text('Consignar'),
+                      ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

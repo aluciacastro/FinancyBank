@@ -3,6 +3,7 @@
 
 import 'dart:math';
 import 'package:cesarpay/presentation/screens/home/retiroScreen.dart';
+import 'package:cesarpay/presentation/screens/loan/PaymentScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cesarpay/presentation/screens/home/ConsigScreen.dart';
@@ -380,6 +381,12 @@ class _MainScreenState extends State<MainScreen> {
                                     ),
                                     onPressed: () {
                                       // Acción para el botón de pagar
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PaymentScreen(document: widget.document), // Pasa el documento aquí
+                                        ),
+                                      );
                                     },
                                   ),
                                 ),

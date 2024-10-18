@@ -24,10 +24,8 @@ class ControllerLoan {
 
         final data = userDoc.data() as Map<String, dynamic>?;
 
-       
         await _ensureFieldsExist(userDoc);
 
-       
         final hasActiveLoan = data?['hasActiveLoan'] ?? false;
         final isReported = data?['isReported'] ?? false;
 
@@ -48,7 +46,6 @@ class ControllerLoan {
     final data = userDoc.data() as Map<String, dynamic>?;
 
     if (data != null) {
-      
       if (!data.containsKey('hasActiveLoan')) {
         await userDoc.reference.set({'hasActiveLoan': false}, SetOptions(merge: true));
       }
@@ -58,7 +55,6 @@ class ControllerLoan {
       if (!data.containsKey('debt')) {
         await userDoc.reference.set({'debt': 0}, SetOptions(merge: true));
       }
-      
       if (!data.containsKey('installments')) {
         await userDoc.reference.set({'installments': []}, SetOptions(merge: true));
       }
@@ -68,59 +64,55 @@ class ControllerLoan {
     }
   }
 
- Future<String> requestLoan(String document, double loanAmount, String interestType, List<Map<String, dynamic>> payments) async {
-  try {
-    QuerySnapshot userSnapshot = await _firestore
-        .collection('users')
-        .where('document', isEqualTo: document)
-        .limit(1)
-        .get();
+  Future<String> requestLoan(String document, double loanAmount, String interestType, List<Map<String, dynamic>> payments) async {
+    try {
+      QuerySnapshot userSnapshot = await _firestore
+          .collection('users')
+          .where('document', isEqualTo: document)
+          .limit(1)
+          .get();
 
-    if (userSnapshot.docs.isNotEmpty) {
-      final userDoc = userSnapshot.docs.first;
-      final data = userDoc.data() as Map<String, dynamic>?;
+      if (userSnapshot.docs.isNotEmpty) {
+        final userDoc = userSnapshot.docs.first;
+        final data = userDoc.data() as Map<String, dynamic>?;
 
-      
-      await _ensureFieldsExist(userDoc);
-      final hasActiveLoan = data?['hasActiveLoan'] ?? false;
+        await _ensureFieldsExist(userDoc);
+        final hasActiveLoan = data?['hasActiveLoan'] ?? false;
 
-      if (!hasActiveLoan) {
-        
-        await userDoc.reference.set({
-          'hasActiveLoan': true,
-          'loanAmount': loanAmount,
-          'interestType': interestType,
-          'debt': loanAmount 
-        }, SetOptions(merge: true));
+        if (!hasActiveLoan) {
+          await userDoc.reference.set({
+            'hasActiveLoan': true,
+            'loanAmount': loanAmount,
+            'interestType': interestType,
+            'debt': loanAmount 
+          }, SetOptions(merge: true));
 
-        
-        await _storePayments(payments, userDoc.reference); 
+          await _storePayments(payments, userDoc.reference);
 
-        return "Préstamo solicitado exitosamente.";
+          return "Préstamo solicitado exitosamente.";
+        } else {
+          return "Ya tienes un préstamo activo.";
+        }
       } else {
-        return "Ya tienes un préstamo activo.";
+        return "Usuario no encontrado.";
       }
-    } else {
-      return "Usuario no encontrado.";
+    } catch (e) {
+      return "Error al solicitar el préstamo: $e";
     }
-  } catch (e) {
-    return "Error al solicitar el préstamo: $e";
   }
-}
 
-
-
-Future<void> _storePayments(List<Map<String, dynamic>> payments, DocumentReference userDocRef) async {
-  final collectionRef = FirebaseFirestore.instance.collection('loan_payments');
-  for (var payment in payments) {
+  Future<void> _storePayments(List<Map<String, dynamic>> payments, DocumentReference userDocRef) async {
+    final collectionRef = FirebaseFirestore.instance.collection('loan_payments');
     
-    await collectionRef.add({
+    // Almacena los pagos en un solo documento relacionado con el usuario
+    await collectionRef.doc(userDocRef.id).set({
       'document': userDocRef.id,
-      'cuota': payment['cuota']?.toStringAsFixed(2) ?? '0.00',
-      'interes': payment['interes']?.toStringAsFixed(2) ?? '0.00',
-      'amortizacion': payment['amortizacion']?.toStringAsFixed(2) ?? '0.00',
-    });
+      'payments': payments.map((payment) => {
+        'cuota': payment['cuota']?.toStringAsFixed(2) ?? '0.00',
+        'interes': payment['interes']?.toStringAsFixed(2) ?? '0.00',
+        'amortizacion': payment['amortizacion']?.toStringAsFixed(2) ?? '0.00',
+        'estado': false, // Campo de estado agregado
+      }).toList(),
+    }, SetOptions(merge: true));
   }
-}
-
 }

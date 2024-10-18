@@ -59,8 +59,9 @@ class LoanScreen extends ConsumerWidget {
       
       // Navegar a la pantalla de detalles de pagos
       Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => PaymentDetailsScreen(payments: payments),
+        builder: (context) => PaymentDetailsScreen(payments: payments, document: document),
       ));
+
     } else {
       message = eligibilityMessage;
 
@@ -69,21 +70,20 @@ class LoanScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _storePaymentsInFirestore(String document, List<Map<String, double>> payments) async {
-    final collectionRef = FirebaseFirestore.instance.collection('loan_payments');
-    
-    for (int i = 0; i < payments.length; i++) {
-      var payment = payments[i];
+Future<void> _storePaymentsInFirestore(String document, List<Map<String, double>> payments) async {
+  final collectionRef = FirebaseFirestore.instance.collection('loan_payments');
 
-      await collectionRef.add({
-        'document': document,
-        'Pago': i + 1,
-        'Cuota': payment['cuota']?.toStringAsFixed(2) ?? '0.00',
-        'Interés': payment['interes']?.toStringAsFixed(2) ?? '0.00',
-        'Amortización': payment['amortizacion']?.toStringAsFixed(2) ?? '0.00',
-      });
-    }
-  }
+  // Crea o actualiza un único documento con el número de documento del usuario
+  await collectionRef.doc(document).set({
+    'document': document,
+    'payments': payments.map((payment) => {
+      'cuota': payment['cuota']?.toStringAsFixed(2) ?? '0.00',
+      'interes': payment['interes']?.toStringAsFixed(2) ?? '0.00',
+      'amortizacion': payment['amortizacion']?.toStringAsFixed(2) ?? '0.00',
+    }).toList(),
+  }, SetOptions(merge: true));
+}
+
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

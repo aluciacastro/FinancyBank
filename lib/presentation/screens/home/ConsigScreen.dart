@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, avoid_print
+// ignore_for_file: avoid_print, library_private_types_in_public_api
 
 import 'package:cesarpay/domain/controller/ControllerConsign.dart';
 import 'package:cesarpay/presentation/widget/shared/custom_background.dart';
@@ -16,14 +16,13 @@ class ConsignarScreen extends StatefulWidget {
 class _ConsignarScreenState extends State<ConsignarScreen> {
   final TextEditingController documentoDestinatarioController = TextEditingController();
   final TextEditingController montoController = TextEditingController();
-  final ControllerConsign _controllerConsign = ControllerConsign(); // Instancia de tu controlador
+  final ControllerConsign _controllerConsign = ControllerConsign();
   bool _isLoading = false;
 
   Future<void> _consignar() async {
     String destinatarioDoc = documentoDestinatarioController.text;
     String monto = montoController.text;
 
-    // Obtener el documento del consignante desde SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     String? consignanteDoc = prefs.getString('lastUserDocument');
 
@@ -32,7 +31,6 @@ class _ConsignarScreenState extends State<ConsignarScreen> {
       return;
     }
 
-    // Verificar si el usuario intenta consignarse a sí mismo
     if (destinatarioDoc == consignanteDoc) {
       _showAlert('Error', 'No puedes consignarte a ti mismo.');
       return;
@@ -48,7 +46,6 @@ class _ConsignarScreenState extends State<ConsignarScreen> {
     });
 
     try {
-      // Realizar consignación
       String resultado = await _controllerConsign.consignar(
         consignanteDoc,
         destinatarioDoc,
@@ -56,8 +53,7 @@ class _ConsignarScreenState extends State<ConsignarScreen> {
       );
       print('Resultado de la consignación: $resultado');
 
-      // Mostrar alerta con el resultado
-      _showAlert('Alerta', resultado.contains('exitoso') ? resultado : 'Error: $resultado');
+      _showAlert('Alerta', resultado.contains('exitosa') ? resultado : 'Error: $resultado');
     } catch (e) {
       _showAlert('Error', 'Error al realizar la consignación: $e');
     } finally {
@@ -95,14 +91,13 @@ class _ConsignarScreenState extends State<ConsignarScreen> {
       ),
       body: Stack(
         children: [
-          // WaveBackground Widget
           const WaveBackground(),
 
-          Padding(
+          SingleChildScrollView( // Añadir SingleChildScrollView aquí
             padding: const EdgeInsets.all(20.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center, // Centra los elementos en el eje horizontal
-              mainAxisAlignment: MainAxisAlignment.start, // Mantiene el orden vertical
+              //crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
                 Center(
@@ -111,13 +106,13 @@ class _ConsignarScreenState extends State<ConsignarScreen> {
                     width: 170,
                     height: 200,
                     fit: BoxFit.fill,
+                    repeat: false,
                   ),
                 ),
-                //const SizedBox(height: 20),
                 const Text(
                   'Rellene todos los campos',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center, // Centra el texto
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 30),
                 TextField(
@@ -144,7 +139,7 @@ class _ConsignarScreenState extends State<ConsignarScreen> {
                         onPressed: _consignar,
                         child: const Text('Consignar'),
                       ),
-                const SizedBox(height: 20), // Añadir separación después del botón
+                const SizedBox(height: 20),
               ],
             ),
           ),

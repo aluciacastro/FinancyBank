@@ -78,7 +78,12 @@ class LoanScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Solicitar Préstamo", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                const Center(
+                  child: Text(
+                    "Solicitar Préstamo", 
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                ),
                 const Divider(
                   color: Color.fromARGB(255, 0, 140, 255),
                   thickness: 5,

@@ -1,47 +1,41 @@
-import 'package:cesarpay/domain/repositories/inflation_repository.dart';
-import 'package:cesarpay/infraestructure/repositories/inflation_repository_imp.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 
-// InflationFormState (el estado del formulario)
-class InflationFormState {
+class InflationState {
   final double initialPrice;
   final double finalPrice;
   final bool isFormPosted;
-  final double result;
+  final double inflationResult;
 
-  InflationFormState({
+  InflationState({
     required this.initialPrice,
     required this.finalPrice,
     required this.isFormPosted,
-    required this.result,
+    required this.inflationResult,
   });
 
-  InflationFormState copyWith({
+  InflationState copyWith({
     double? initialPrice,
     double? finalPrice,
     bool? isFormPosted,
-    double? result,
+    double? inflationResult,
   }) {
-    return InflationFormState(
+    return InflationState(
       initialPrice: initialPrice ?? this.initialPrice,
       finalPrice: finalPrice ?? this.finalPrice,
       isFormPosted: isFormPosted ?? this.isFormPosted,
-      result: result ?? this.result,
+      inflationResult: inflationResult ?? this.inflationResult,
     );
   }
 }
 
-// InflationFormNotifier (gestor del estado)
-class InflationFormNotifier extends StateNotifier<InflationFormState> {
-  final InflationRepository inflationRepository;
-
-  InflationFormNotifier(this.inflationRepository)
-      : super(InflationFormState(
+class InflationNotifier extends StateNotifier<InflationState> {
+  InflationNotifier()
+      : super(InflationState(
           initialPrice: 0,
           finalPrice: 0,
           isFormPosted: false,
-          result: 0,
+          inflationResult: 0,
         ));
 
   void onInitialPriceChanged(double value) {
@@ -53,23 +47,13 @@ class InflationFormNotifier extends StateNotifier<InflationFormState> {
   }
 
   void calculateInflation() {
-    final result = inflationRepository.calculateInflation(
-      state.initialPrice,
-      state.finalPrice,
-    );
-
-    state = state.copyWith(result: result, isFormPosted: true);
+    if (state.initialPrice > 0 && state.finalPrice > 0) {
+      final inflation = ((state.finalPrice - state.initialPrice) / state.initialPrice) * 100;
+      state = state.copyWith(inflationResult: inflation, isFormPosted: true);
+    }
   }
 }
 
-// Provider para el formulario de inflación
-final inflationFormProvider =
-    StateNotifierProvider<InflationFormNotifier, InflationFormState>((ref) {
-  final inflationRepository = ref.watch(inflationRepositoryProvider);
-  return InflationFormNotifier(inflationRepository);
-});
-
-// Provider para el repositorio de inflación
-final inflationRepositoryProvider = Provider<InflationRepository>((ref) {
-  return InflationRepositoryImpl();
+final inflationProvider = StateNotifierProvider<InflationNotifier, InflationState>((ref) {
+  return InflationNotifier();
 });

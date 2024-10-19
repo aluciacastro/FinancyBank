@@ -1,5 +1,3 @@
-// lib/domain/controller/ControllerLoan.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ControllerLoan {
@@ -55,12 +53,6 @@ class ControllerLoan {
       if (!data.containsKey('debt')) {
         await userDoc.reference.set({'debt': 0}, SetOptions(merge: true));
       }
-      if (!data.containsKey('installments')) {
-        await userDoc.reference.set({'installments': []}, SetOptions(merge: true));
-      }
-      if (!data.containsKey('interest')) {
-        await userDoc.reference.set({'interest': 0.0}, SetOptions(merge: true));
-      }
     }
   }
 
@@ -84,7 +76,7 @@ class ControllerLoan {
             'hasActiveLoan': true,
             'loanAmount': loanAmount,
             'interestType': interestType,
-            'debt': loanAmount 
+            'debt': loanAmount // Inicializar deuda con el monto del préstamo
           }, SetOptions(merge: true));
 
           await _storePayments(payments, userDoc.reference);
@@ -102,16 +94,14 @@ class ControllerLoan {
   }
 
   Future<void> _storePayments(List<Map<String, dynamic>> payments, DocumentReference userDocRef) async {
-    final collectionRef = FirebaseFirestore.instance.collection('loan_payments');
-    
-    // Almacena los pagos en un solo documento relacionado con el usuario
-    await collectionRef.doc(userDocRef.id).set({
+    await _firestore.collection('loan_payments').doc(userDocRef.id).set({
       'document': userDocRef.id,
+      'loanStatus': 'active', // Estado del préstamo activo
       'payments': payments.map((payment) => {
         'cuota': payment['cuota']?.toStringAsFixed(2) ?? '0.00',
         'interes': payment['interes']?.toStringAsFixed(2) ?? '0.00',
         'amortizacion': payment['amortizacion']?.toStringAsFixed(2) ?? '0.00',
-        'estado': false, // Campo de estado agregado
+        'estado': false, // Pagos no realizados al inicio
       }).toList(),
     }, SetOptions(merge: true));
   }

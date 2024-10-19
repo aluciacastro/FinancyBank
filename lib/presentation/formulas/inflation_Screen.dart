@@ -1,110 +1,108 @@
-
-import 'package:cesarpay/presentation/widget/shared/custom_background.dart';
-import 'package:cesarpay/presentation/widget/shared/custom_filled_button.dart';
-import 'package:cesarpay/presentation/widget/shared/custom_text_form_field.dart';
-import 'package:cesarpay/presentation/widget/shared/header.dart';
+import 'package:cesarpay/presentation/widget/operations/concep.dart';
 import 'package:cesarpay/providers/inflation/inflationProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../widget/shared/custom_background.dart';
+import '../widget/shared/custom_filled_button.dart';
+import '../widget/shared/custom_text_form_field.dart';
+import '../widget/shared/header.dart';
 
-class InflationScreen extends StatelessWidget {
+class InflationScreen extends ConsumerWidget {
   const InflationScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final inflationForm = ref.watch(inflationProvider);
+    final textStyles = Theme.of(context).textTheme;
+
     return CustomBackground(
       height: 200,
       showArrow: true,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Header(),
-              const SizedBox(height: 20),
-              Container(
-                width: double.infinity,
-                height: 600,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 255, 255, 255),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const _InflationForm(),
+              const Divider(
+                color: Color.fromARGB(255, 0, 140, 255),
+                thickness: 5,
+                indent: 50,
+                endIndent: 50,
               ),
+              const SizedBox(height: 20),
+              Text("Cálculo de Inflación", style: textStyles.titleLarge),
+              const Divider(
+                color: Color.fromARGB(255, 0, 140, 255),
+                thickness: 5,
+                indent: 50,
+                endIndent: 50,
+              ),
+              const SizedBox(height: 20),
+              const Concept(
+                definition:
+                    "La inflación mide el aumento del nivel de precios de bienes y servicios en un período de tiempo.",
+                important: ["inflación", "nivel de precios"],
+                equations: [
+                  r"I = \frac{P_f - P_i}{P_i} \times 100"
+                ],
+              ),
+              const SizedBox(height: 30),
+              Text("Ingrese los valores necesarios:", style: textStyles.bodyMedium),
+              const SizedBox(height: 15),
+
+              CustomTextFormField(
+                label: "Precio Final (P_f)",
+                onChanged: (value) {
+                  ref.read(inflationProvider.notifier).onFinalPriceChanged(double.tryParse(value) ?? 0);
+                },
+              ),
+              const SizedBox(height: 15),
+              CustomTextFormField(
+                label: "Precio Inicial (P_i)",
+                onChanged: (value) {
+                  ref.read(inflationProvider.notifier).onInitialPriceChanged(double.tryParse(value) ?? 0);
+                },
+              ),
+              const SizedBox(height: 30),
+              SizedBox(
+                width: double.infinity,
+                height: 40,
+                child: CustomFilledButton(
+                  onPressed: () {
+                    ref.read(inflationProvider.notifier).calculateInflation();
+                  },
+                  buttonColor: const Color.fromARGB(255, 0, 140, 255),
+                  child: const Text("Calcular"),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              if (inflationForm.isFormPosted)
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: const Color.fromARGB(255, 0, 140, 255),
+                  ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        "RESULTADO:",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        "La Inflación es de: ${inflationForm.inflationResult.toStringAsFixed(2)}%",
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _InflationForm extends ConsumerWidget {
-  const _InflationForm();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final inflationForm = ref.watch(inflationFormProvider);
-
-    return Padding(
-      padding: const EdgeInsets.all(30),
-      child: Column(
-        children: [
-          Text("Calculadora de Inflación", style: Theme.of(context).textTheme.titleLarge),
-          const Divider(color: Colors.blue, thickness: 5),
-          const SizedBox(height: 20),
-          CustomTextFormField(
-            label: "Precio inicial (P1)",
-            onChanged: (value) {
-              ref
-                  .read(inflationFormProvider.notifier)
-                  .onInitialPriceChanged(double.tryParse(value) ?? 0);
-            },
-            errorMessage: inflationForm.isFormPosted && inflationForm.initialPrice <= 0
-                ? "Ingrese un precio inicial válido"
-                : null,
-          ),
-          const SizedBox(height: 20),
-          CustomTextFormField(
-            label: "Precio final (P2)",
-            onChanged: (value) {
-              ref
-                  .read(inflationFormProvider.notifier)
-                  .onFinalPriceChanged(double.tryParse(value) ?? 0);
-            },
-            errorMessage: inflationForm.isFormPosted && inflationForm.finalPrice <= 0
-                ? "Ingrese un precio final válido"
-                : null,
-          ),
-          const SizedBox(height: 40),
-          CustomFilledButton(
-            onPressed: ref.read(inflationFormProvider.notifier).calculateInflation,
-            buttonColor: Colors.blue,
-            child: const Text("Calcular"),
-          ),
-          const SizedBox(height: 20),
-          if (inflationForm.isFormPosted)
-            Container(
-              padding: const EdgeInsets.all(10),
-              width: double.infinity,
-              height: 100,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.blue,
-              ),
-              child: Column(
-                children: [
-                  const Text("RESULTADO:", style: TextStyle(color: Colors.white)),
-                  const SizedBox(height: 6),
-                  Text(
-                    "La inflación calculada es de: ${inflationForm.result.toStringAsFixed(2)}%",
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-        ],
       ),
     );
   }

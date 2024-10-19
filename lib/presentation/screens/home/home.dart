@@ -1,5 +1,6 @@
 import 'package:cesarpay/presentation/formulas/InvestmentEvaluationScreen.dart';
 import 'package:cesarpay/presentation/formulas/amortization_screen.dart';
+import 'package:cesarpay/presentation/formulas/bond_screen.dart';
 import 'package:cesarpay/presentation/formulas/compound_interest_screen.dart';
 import 'package:cesarpay/presentation/formulas/gradient_screen.dart';
 import 'package:cesarpay/presentation/formulas/inflation_Screen.dart';
@@ -176,6 +177,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const TirScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.account_balance_wallet_rounded),
+              title: const Text('BONOS'),
+              onTap: () {
+                Navigator.pop(context); // Cierra el menú
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BondScreen(),
                   ),
                 );
               },

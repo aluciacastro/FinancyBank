@@ -1,56 +1,51 @@
-import 'package:cesarpay/domain/repositories/InvestmentEvaluationRepository.dart';
-import 'package:cesarpay/infraestructure/repositories/InvestmentEvaluationRepositoryImpl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:math';
 
-class InvestmentEvaluationFormState {
-  final double initialInvestment;
+class InvestmentState {
   final List<double> cashFlows;
   final double discountRate;
   final bool isFormPosted;
-  final double result;
+  final double npvResult;
 
-  InvestmentEvaluationFormState({
-    required this.initialInvestment,
+  InvestmentState({
     required this.cashFlows,
     required this.discountRate,
     required this.isFormPosted,
-    required this.result,
+    required this.npvResult,
   });
 
-  InvestmentEvaluationFormState copyWith({
-    double? initialInvestment,
+  InvestmentState copyWith({
     List<double>? cashFlows,
     double? discountRate,
     bool? isFormPosted,
-    double? result,
+    double? npvResult,
   }) {
-    return InvestmentEvaluationFormState(
-      initialInvestment: initialInvestment ?? this.initialInvestment,
+    return InvestmentState(
       cashFlows: cashFlows ?? this.cashFlows,
       discountRate: discountRate ?? this.discountRate,
       isFormPosted: isFormPosted ?? this.isFormPosted,
-      result: result ?? this.result,
+      npvResult: npvResult ?? this.npvResult,
     );
   }
 }
-class InvestmentEvaluationFormNotifier extends StateNotifier<InvestmentEvaluationFormState> {
-  final InvestmentEvaluationRepository investmentRepository;
 
-  InvestmentEvaluationFormNotifier(this.investmentRepository)
-      : super(InvestmentEvaluationFormState(
-          initialInvestment: 0,
+class InvestmentNotifier extends StateNotifier<InvestmentState> {
+  InvestmentNotifier()
+      : super(InvestmentState(
           cashFlows: [],
           discountRate: 0,
           isFormPosted: false,
-          result: 0,
+          npvResult: 0,
         ));
 
-  void onInitialInvestmentChanged(double value) {
-    state = state.copyWith(initialInvestment: value);
-  }
-
-  void onCashFlowsChanged(List<double> values) {
-    state = state.copyWith(cashFlows: values);
+  void onCashFlowChanged(int index, double value) {
+    final updatedCashFlows = List<double>.from(state.cashFlows);
+    if (index < updatedCashFlows.length) {
+      updatedCashFlows[index] = value;
+    } else {
+      updatedCashFlows.add(value);
+    }
+    state = state.copyWith(cashFlows: updatedCashFlows);
   }
 
   void onDiscountRateChanged(double value) {
@@ -58,22 +53,15 @@ class InvestmentEvaluationFormNotifier extends StateNotifier<InvestmentEvaluatio
   }
 
   void calculateNPV() {
-    final result = investmentRepository.calculateNPV(
-      state.initialInvestment,
-      state.cashFlows,
-      state.discountRate,
-    );
+    double npv = 0;
+    for (int t = 0; t < state.cashFlows.length; t++) {
+      npv += state.cashFlows[t] / pow((1 + (state.discountRate / 100)), t + 1);
+    }
 
-    state = state.copyWith(result: result, isFormPosted: true);
+    state = state.copyWith(npvResult: npv, isFormPosted: true);
   }
 }
 
-final investmentEvaluationFormProvider =
-    StateNotifierProvider<InvestmentEvaluationFormNotifier, InvestmentEvaluationFormState>((ref) {
-  final investmentRepository = ref.watch(investmentRepositoryProvider);
-  return InvestmentEvaluationFormNotifier(investmentRepository);
-});
-
-final investmentRepositoryProvider = Provider<InvestmentEvaluationRepository>((ref) {
-  return InvestmentEvaluationRepositoryImpl();
+final investmentProvider = StateNotifierProvider<InvestmentNotifier, InvestmentState>((ref) {
+  return InvestmentNotifier();
 });

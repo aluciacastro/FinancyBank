@@ -1,5 +1,6 @@
 // ignore_for_file: sort_child_properties_last
 
+import 'package:cesarpay/presentation/widget/operations/concep.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/amortizacion/amortization_provider.dart';
@@ -26,11 +27,23 @@ class AmortizationScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Header(), 
+              
+              const SizedBox(height: 20),
+              Text("Amortización de Préstamos", style: textStyles.titleLarge),
               const Divider(
                 color: Color.fromARGB(255, 0, 140, 255),
                 thickness: 5,
                 indent: 50,
                 endIndent: 50,
+              ),
+              const SizedBox(height: 20),
+              const Concept(
+                definition:
+                    "La amortización de préstamos consiste en el pago del principal y los intereses a lo largo del tiempo en cuotas periódicas.",
+                important: ["principal", "intereses", "cuotas periódicas"],
+                equations: [
+                  r"A = \frac{P \cdot r \cdot (1 + r)^n}{(1 + r)^n - 1}"
+                ],
               ),
 
               const SizedBox(height: 20),

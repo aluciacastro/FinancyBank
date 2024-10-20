@@ -8,21 +8,29 @@ class PaymentDetailsScreen extends StatelessWidget {
   const PaymentDetailsScreen({super.key, required this.payments, required this.document});
 
   Future<List<Map<String, dynamic>>> _getPayments(String document) async {
-  final docSnapshot = await FirebaseFirestore.instance.collection('loan_payments').doc(document).get();
-  final data = docSnapshot.data();
-  
-  if (data != null && data['loanPayments'] != null) {
-    final payments = data['loanPayments'] as List<dynamic>;
-    return payments.map<Map<String, dynamic>>((payment) => {
-      'cuota': payment['cuota'] ?? 0.0,
-      'interes': payment['interes'] ?? 0.0,
-      'amortizacion': payment['amortizacion'] ?? 0.0,
-      'estado': payment['estado'] ?? false,
-    }).toList();
+    // Realiza una consulta para obtener el documento que tenga el atributo 'document' igual al valor proporcionado
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('loan_payments')
+        .where('document', isEqualTo: document)
+        .get();
+    
+    if (querySnapshot.docs.isNotEmpty) {
+      final doc = querySnapshot.docs.first; // Toma el primer documento que coincida con la consulta
+      final data = doc.data();
+      
+      if (data['loanPayments'] != null) {
+        final payments = data['loanPayments'] as List<dynamic>;
+        return payments.map<Map<String, dynamic>>((payment) => {
+          'cuota': payment['cuota'] ?? 0.0,
+          'interes': payment['interes'] ?? 0.0,
+          'amortizacion': payment['amortizacion'] ?? 0.0,
+          'estado': payment['estado'] ?? false,
+        }).toList();
+      }
+    }
+    
+    return []; // Retorna una lista vacía si no hay datos
   }
-  
-  return []; // Retorna una lista vacía si no hay datos
-}
 
 
   @override

@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
-
 import 'package:cesarpay/presentation/widget/Waves.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -143,42 +141,43 @@ class _RetiroScreenState extends State<RetiroScreen> {
       ),
       body: Stack(
         children: [
-          const WaveBackground(), 
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: Column(
-                //mainAxisAlignment: MainAxisAlignment.center, 
-                crossAxisAlignment: CrossAxisAlignment.center, 
-                children: [
-                  const SizedBox(height: 100),
-                  Lottie.asset(
-                    'assets/lottie/Retiro_Animation.json', 
-                    width: 170, 
-                    height: 170,
-                    fit: BoxFit.fill,
-                  ),
-                  const Text(
-                    'Monto a retirar',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 30),
-                  TextField(
-                    controller: _montoController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      hintText: 'Ingresa el monto',
-                      border: OutlineInputBorder(),
+          const WaveBackground(),
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 100),
+                    Lottie.asset(
+                      'assets/lottie/Retiro_Animation.json',
+                      width: 170,
+                      height: 170,
+                      fit: BoxFit.fill,
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  _isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : ElevatedButton(
-                          onPressed: _realizarRetiro,
-                          child: const Text('Retirar'),
-                        ),
-                ],
+                    const Text(
+                      'Monto a retirar',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 30),
+                    TextField(
+                      controller: _montoController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        hintText: 'Ingresa el monto',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : ElevatedButton(
+                            onPressed: _realizarRetiro,
+                            child: const Text('Retirar'),
+                          ),
+                  ],
+                ),
               ),
             ),
           ),

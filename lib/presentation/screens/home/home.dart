@@ -7,13 +7,13 @@ import 'package:cesarpay/presentation/formulas/inflation_Screen.dart';
 import 'package:cesarpay/presentation/formulas/screen_tirr.dart';
 import 'package:cesarpay/presentation/formulas/simple_interest_screen.dart';
 import 'package:cesarpay/presentation/formulas/uvr_screen.dart';
-import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
 import 'package:cesarpay/presentation/screens/home/main_screen.dart';
 import 'package:cesarpay/presentation/screens/movimientos/moviments_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import '../../formulas/annuities_screen.dart';
+
+
 class HomeScreen extends StatefulWidget {
   final String document;
 
@@ -35,8 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _screens = [
       MainScreen(document: widget.document),
       WithdrawalScreen(document: widget.document),
-      Container(), // Placeholder para estadísticas
-      const UserProfileScreen(),
+
     ];
   }
 
@@ -44,14 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _currentIndex = index;
     });
-
-    if (index == 1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) =>  WithdrawalScreen(document: widget.document)),
-      );
     }
-  }
 
   void _showOptionsMenu(BuildContext context) {
   showModalBottomSheet(
@@ -207,13 +199,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+     return Scaffold(
       appBar: AppBar(),
       bottomNavigationBar: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
-          onTap: _onItemTapped,
+          onTap: _onItemTapped, // Cambia de pantalla sin usar Navigator.push
           backgroundColor: Colors.white,
           showSelectedLabels: false,
           showUnselectedLabels: false,
@@ -221,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
           items: const [
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.home),
-              label: 'home',
+              label: 'Home',
             ),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.list_bullet),

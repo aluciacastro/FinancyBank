@@ -14,7 +14,6 @@ class WithdrawalScreen extends StatefulWidget {
 class _WithdrawalScreenState extends State<WithdrawalScreen> {
   late final MovementService _movementService;
   late Stream<List<Map<String, dynamic>>> _withdrawalHistory; 
-  bool _isProcessingWithdrawal = false; 
 
   @override
   void initState() {
@@ -25,106 +24,77 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Historial de Retiros'),
-      ),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _withdrawalHistory,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No hay retiros disponibles'));
-          } else {
-            final withdrawals = snapshot.data!;
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        color: const Color(0xFFEFEFEF), // Color de fondo si es necesario
+        child: StreamBuilder<List<Map<String, dynamic>>>(
+          stream: _withdrawalHistory,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return const Center(child: Text('Error al cargar los movimientos'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('No hay retiros disponibles'));
+            } else {
+              final withdrawals = snapshot.data!;
+              return ListView.builder(
+                itemCount: withdrawals.length,
+                itemBuilder: (context, index) {
+                  final withdrawal = withdrawals[index];
+                  final description = withdrawal['descripcion'] ?? 'Descripción no disponible';
+                  final date = withdrawal['fecha'] ?? DateTime.now();
+                  final amount = withdrawal['monto'] ?? 0.0;
 
-            return ListView.builder(
-              itemCount: withdrawals.length,
-              itemBuilder: (context, index) {
-                final withdrawal = withdrawals[index];
-
-                // Obtener detalles del retiro
-                final description = withdrawal['descripcion'] ?? 'Descripción no disponible';
-                final date = withdrawal['fecha'] ?? DateTime.now(); // Asignar fecha actual si no hay fecha
-                final amount = withdrawal['monto'] ?? 0.0;
-
-                return Card(
-                  color: const Color.fromARGB(255, 255, 0, 140), // Color de la tarjeta
-                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0), // Espaciado dentro de la tarjeta
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween, // Alinear contenido en ambos lados
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Retiro: \$${amount.toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  color: Colors.black, // Color del texto
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+                  return Card(
+                    color: const Color.fromARGB(255, 0, 140, 255),
+                    margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Retiro: \$${amount.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    color: Colors.white, 
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 10), // Espaciado entre el monto y la descripción
-                              Text(
-                                'Descripción: $description',
-                                style: const TextStyle(
-                                  color: Colors.black, // Color del texto
-                                  fontSize: 16,
+                                const SizedBox(height: 10),
+                                Text(
+                                  'Descripción: $description',
+                                  style: const TextStyle(
+                                    color: Colors.white, 
+                                    fontSize: 16,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 10), // Espaciado entre la descripción y la fecha
-                              Text(
-                                'Fecha: ${date.toLocal()}',
-                                style: const TextStyle(
-                                  color: Colors.black, // Color del texto
-                                  fontSize: 14,
+                                const SizedBox(height: 10),
+                                Text(
+                                  'Fecha: ${date.toLocal()}',
+                                  style: const TextStyle(
+                                    color: Colors.white, 
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 10), // Espaciado entre la columna y el botón
-                        ElevatedButton(
-                          onPressed: _isProcessingWithdrawal ? null : () async {
-                            setState(() {
-                              _isProcessingWithdrawal = true; // Establecer estado de procesamiento
-                            });
-
-                            // Lógica para realizar alguna acción con el retiro, si es necesario
-                            // Por ejemplo, confirmar el retiro
-                            // bool success = await _movementService.confirmWithdrawal(withdrawal);
-                            // if (success) {
-                            //   // Aquí podrías actualizar el historial si fuera necesario
-                            //   ScaffoldMessenger.of(context).showSnackBar(
-                            //     const SnackBar(content: Text('Retiro confirmado con éxito')),
-                            //   );
-                            // } else {
-                            //   ScaffoldMessenger.of(context).showSnackBar(
-                            //     const SnackBar(content: Text('Error al confirmar el retiro')),
-                            //   );
-                            // }
-
-                            setState(() {
-                              _isProcessingWithdrawal = false; // Restablecer estado de procesamiento
-                            });
-                          },
-                          child: _isProcessingWithdrawal 
-                              ? const CircularProgressIndicator() 
-                              : const Text('Confirmar'), // Mostrar indicador de carga
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
-            );
-          }
-        },
+                  );
+                },
+              );
+            }
+          },
+        ),
       ),
     );
   }

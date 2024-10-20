@@ -13,7 +13,7 @@ class ControllerConsign {
           .where('document', isEqualTo: consignanteDoc)
           .limit(1)
           .get();
-      
+
       if (consignanteSnapshot.docs.isEmpty) {
         return 'El consignante no fue encontrado.';
       }
@@ -24,7 +24,7 @@ class ControllerConsign {
 
       // Buscar el destinatario por su número de documento
       QuerySnapshot destinatarioSnapshot = await _firestore
-          .collection('users')
+          .collection('loan_payments')
           .where('document', isEqualTo: destinatarioDoc)
           .limit(1)
           .get();
@@ -53,6 +53,17 @@ class ControllerConsign {
 
       await _firestore.collection('loan_payments').doc(destinatarioData.id).update({
         'balance': nuevoSaldoDestinatario,
+      });
+
+      // Registrar el movimiento en la colección "retiros_historial"
+      await _firestore.collection('retiros_historial').add({
+        'document': consignanteDoc, // Referencia del documento del consignante
+        'movimiento': {
+          'descripcion': 'Consignación de $monto a $destinatarioDoc',
+          'fecha': FieldValue.serverTimestamp(), // Fecha del servidor
+          'monto': monto,
+          'destinatario': destinatarioDoc, // Agregar el destinatario para referencia
+        }
       });
 
       return 'Consignación exitosa! Nuevo saldo del consignante: \$${nuevoSaldoConsignante.toStringAsFixed(2)}';

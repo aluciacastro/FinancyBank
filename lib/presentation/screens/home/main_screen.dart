@@ -3,6 +3,7 @@
 
 import 'dart:math';
 import 'package:cesarpay/presentation/screens/home/retiroScreen.dart';
+import 'package:cesarpay/presentation/screens/loan/PaymentDetailsScreen.dart';
 import 'package:cesarpay/presentation/screens/loan/PaymentScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -230,63 +231,92 @@ class _MainScreenState extends State<MainScreen> {
                   },
                 ),
                 const SizedBox(height: 20),
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.2),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Solicitudes de Préstamos',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Revisa si eres apto para solicitar tu prestamo!!!',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoanScreen(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text('Vamos!'),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-                  ),
+Container(
+  width: MediaQuery.of(context).size.width,
+  padding: const EdgeInsets.all(16.0),
+  decoration: BoxDecoration(
+    color: Theme.of(context).colorScheme.surface,
+    borderRadius: BorderRadius.circular(12),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.2),
+        spreadRadius: 2,
+        blurRadius: 5,
+        offset: const Offset(0, 3),
+      ),
+    ],
+  ),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        'Solicitudes de Préstamos',
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
+      ),
+      const SizedBox(height: 12),
+      Text(
+        'Revisa si eres apto para solicitar tu prestamo!!!',
+        style: TextStyle(
+          fontSize: 14,
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+        ),
+      ),
+      const SizedBox(height: 12),
+      
+      // Colocamos los botones en un Row
+      Row(
+        children: [
+          // Botón Vamos
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LoanScreen(),
                 ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Vamos!'),
+          ),
+          
+          const SizedBox(width: 10), // Espacio entre los botones
+          
+          // Botón Detalles
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PaymentDetailsScreen(document: widget.document, payments: const [],),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Detalles'),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
+
                 const SizedBox(height: 20),
                 Container(
                   width: MediaQuery.of(context).size.width,

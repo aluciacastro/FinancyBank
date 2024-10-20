@@ -11,8 +11,8 @@ class PaymentDetailsScreen extends StatelessWidget {
   final docSnapshot = await FirebaseFirestore.instance.collection('loan_payments').doc(document).get();
   final data = docSnapshot.data();
   
-  if (data != null && data['payments'] != null) {
-    final payments = data['payments'] as List<dynamic>;
+  if (data != null && data['loanPayments'] != null) {
+    final payments = data['loanPayments'] as List<dynamic>;
     return payments.map<Map<String, dynamic>>((payment) => {
       'cuota': payment['cuota'] ?? 0.0,
       'interes': payment['interes'] ?? 0.0,

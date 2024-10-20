@@ -3,32 +3,30 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class MovementService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> saveMovement({
-    required String userId, 
-    required String calculationType, 
-    required double result,
-  }) async {
-    try {
-      final collectionRef = _firestore.collection('movements');
-      await collectionRef.add({
-        'userId': userId,
-        'calculationType': calculationType,
-        'result': result,
-        'date': Timestamp.now(),
-      });
-      
-    } catch (e) {
-      // ignore: avoid_print
-      print("Error al guardar el movimiento: $e");
-    }
-  }
-
-  Stream<List<Map<String, dynamic>>> getMovements(String userId) {
+  // Método para obtener el historial de retiros de la colección 'retiros_historial'
+  Stream<List<Map<String, dynamic>>> getRetiroHistorial(String documentId) {
     return _firestore
-        .collection('movements')
-        .where('userId', isEqualTo: userId)
-        .orderBy('date', descending: true)
+        .collection('retiros_historial') 
+        .where('document', isEqualTo: documentId) 
+        .orderBy('movimiento.fecha', descending: true) 
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data();
+
+              // Verificamos que los campos necesarios existan antes de acceder a ellos
+              final movimiento = data['movimiento'] as Map<String, dynamic>? ?? {};
+              final descripcion = movimiento['descripcion'] ?? 'Descripción no disponible';
+              final fecha = movimiento['fecha'] != null
+                  ? (movimiento['fecha'] as Timestamp).toDate()
+                  : DateTime.now(); // Si no hay fecha, asignamos la fecha actual
+              final monto = movimiento['monto'] ?? 0.0;
+              print("Received ${snapshot.docs.length} documents.");
+
+              return {
+                'descripcion': descripcion,
+                'fecha': fecha,
+                'monto': monto,
+              };
+            }).toList());
   }
 }

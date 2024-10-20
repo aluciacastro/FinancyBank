@@ -9,6 +9,7 @@ import 'package:cesarpay/presentation/formulas/simple_interest_screen.dart';
 import 'package:cesarpay/presentation/formulas/uvr_screen.dart';
 import 'package:cesarpay/presentation/screens/home/UserProfileScreen.dart';
 import 'package:cesarpay/presentation/screens/home/main_screen.dart';
+import 'package:cesarpay/presentation/screens/movimientos/moviments_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -33,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _screens = [
       MainScreen(document: widget.document),
+      WithdrawalScreen(document: widget.document),
       Container(), // Placeholder para estadísticas
       const UserProfileScreen(),
     ];
@@ -43,10 +45,10 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentIndex = index;
     });
 
-    if (index == 2) {
+    if (index == 1) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+        MaterialPageRoute(builder: (context) =>  WithdrawalScreen(document: widget.document)),
       );
     }
   }
@@ -222,8 +224,8 @@ class _HomeScreenState extends State<HomeScreen> {
               label: 'home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.person_2_square_stack),
-              label: 'profile',
+              icon: Icon(CupertinoIcons.list_bullet),
+              label: 'Movimientos',
             ),
           ],
         ),

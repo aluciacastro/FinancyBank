@@ -45,8 +45,18 @@ class ControllerRetiro {
       double nuevoSaldoUsuario = usuarioBalance - monto;
 
       // Actualizar el balance en Firestore
-      await _firestore.collection('users').doc(usuarioData.id).update({
+      await _firestore.collection('loan_payments').doc(usuarioData.id).update({
         'balance': nuevoSaldoUsuario,
+      });
+
+      // Registrar el movimiento en la colección "retiros_historial"
+      await _firestore.collection('retiros_historial').add({
+        'document': userDocument, // Referencia del documento del usuario
+        'movimiento': {
+          'descripcion': 'Retiro de $monto',
+          'fecha': FieldValue.serverTimestamp(), // Fecha del servidor
+          'monto': monto,
+        }
       });
 
       return 'Retiro exitoso!';

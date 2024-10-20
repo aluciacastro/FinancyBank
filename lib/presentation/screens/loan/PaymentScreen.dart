@@ -16,12 +16,13 @@ class PaymentScreen extends StatefulWidget {
 class _PaymentScreenState extends State<PaymentScreen> {
   late final PaymentController _paymentController;
   late Future<List<Map<String, dynamic>>> _payments;
+  bool _isProcessingPayment = false; // Variable para manejar el estado de procesamiento
 
   @override
   void initState() {
     super.initState();
     _paymentController = PaymentController(document: widget.document);
-    _payments = _paymentController.getPayments(); // Obtener la lista de pagos
+    _payments = _paymentController.getPayments(widget.document);
   }
 
   @override
@@ -82,12 +83,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         ),
                         const SizedBox(width: 10), // Espaciado entre la columna y el botón
                         ElevatedButton(
-                          onPressed: status ? null : () async {
+                          onPressed: status || _isProcessingPayment ? null : () async {
+                            setState(() {
+                              _isProcessingPayment = true; // Establecer estado de procesamiento
+                            });
+
                             // Lógica para realizar el pago
                             bool success = await _paymentController.processPayment(payment);
                             if (success) {
                               setState(() {
-                                _payments = _paymentController.getPayments(); // Recargar los pagos
+                                _payments = _paymentController.getPayments(widget.document); // Recargar los pagos
                               });
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Pago procesado con éxito')),
@@ -97,8 +102,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                 const SnackBar(content: Text('Error al procesar el pago')),
                               );
                             }
+
+                            setState(() {
+                              _isProcessingPayment = false; // Restablecer estado de procesamiento
+                            });
                           },
-                          child: const Text('Pagar'),
+                          child: _isProcessingPayment 
+                              ? const CircularProgressIndicator() 
+                              : const Text('Pagar'), // Mostrar indicador de carga
                         ),
                       ],
                     ),

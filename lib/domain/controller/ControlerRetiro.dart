@@ -23,7 +23,7 @@ class ControllerRetiro {
 
       // Buscar el usuario por su número de documento en Firestore
       QuerySnapshot usuarioSnapshot = await _firestore
-          .collection('users')
+          .collection('loan_payments')
           .where('document', isEqualTo: userDocument)
           .limit(1)
           .get();
@@ -60,7 +60,7 @@ class ControllerRetiro {
   Future<String> obtenerNombreUsuario(String documentId) async {
     try {
       QuerySnapshot<Map<String, dynamic>> userDocs = await _firestore
-          .collection('users')
+          .collection('loan_payments')
           .where('document', isEqualTo: documentId)
           .get();
 

@@ -9,7 +9,7 @@ class ControllerConsign {
     try {
       // Buscar el consignante por su número de documento
       QuerySnapshot consignanteSnapshot = await _firestore
-          .collection('users')
+          .collection('loan_payments')
           .where('document', isEqualTo: consignanteDoc)
           .limit(1)
           .get();
@@ -47,11 +47,11 @@ class ControllerConsign {
       double nuevoSaldoDestinatario = destinatarioBalance + monto;
 
       // Realizar las actualizaciones en Firestore
-      await _firestore.collection('users').doc(consignanteData.id).update({
+      await _firestore.collection('loan_payments').doc(consignanteData.id).update({
         'balance': nuevoSaldoConsignante,
       });
 
-      await _firestore.collection('users').doc(destinatarioData.id).update({
+      await _firestore.collection('loan_payments').doc(destinatarioData.id).update({
         'balance': nuevoSaldoDestinatario,
       });
 

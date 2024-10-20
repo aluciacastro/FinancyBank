@@ -52,7 +52,7 @@ class LoanScreen extends ConsumerWidget {
       final payments = ref.read(amortizationProvider).payments;
 
       await controllerLoan.requestLoan(document, loanAmount, ref.watch(amortizationProvider).amortizationType, payments);
-      await _storePaymentsInFirestore(document, payments);
+      
       
       // Mostrar alerta de éxito
       _showMessage(context, 'Préstamo solicitado con éxito. Las cuotas han sido calculadas y almacenadas.', isSuccess: true);
@@ -70,19 +70,7 @@ class LoanScreen extends ConsumerWidget {
     }
   }
 
-Future<void> _storePaymentsInFirestore(String document, List<Map<String, double>> payments) async {
-  final collectionRef = FirebaseFirestore.instance.collection('loan_payments');
 
-  // Crea o actualiza un único documento con el número de documento del usuario
-  await collectionRef.doc(document).set({
-    'document': document,
-    'payments': payments.map((payment) => {
-      'cuota': payment['cuota']?.toStringAsFixed(2) ?? '0.00',
-      'interes': payment['interes']?.toStringAsFixed(2) ?? '0.00',
-      'amortizacion': payment['amortizacion']?.toStringAsFixed(2) ?? '0.00',
-    }).toList(),
-  }, SetOptions(merge: true));
-}
 
 
   @override

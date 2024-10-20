@@ -5,53 +5,86 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class PaymentController {
   final String document; // Documento del usuario
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  
 
   PaymentController({required this.document});
 
-  Future<List<Map<String, dynamic>>> getPayments() async {
-    try {
-      final paymentDoc = await _firestore.collection('loan_payments').doc(document).get();
-      if (paymentDoc.exists) {
-        final List<dynamic> payments = paymentDoc.data()?['payments'] ?? [];
-        return payments.map<Map<String, dynamic>>((payment) => {
-          'cuota': payment['cuota']?.toString() ?? '0.0', // Asegúrate de convertir a cadena
-          'estado': payment['estado'] ?? false,
-        }).toList();
-      } else {
-        print('Error: Documento de pagos no encontrado.');
-      }
-    } catch (e) {
-      print('Error al obtener los pagos: $e');
-    }
-    return [];
-  }
-
-  Future<bool> processPayment(Map<String, dynamic> payment) async {
+ Future<List<Map<String, dynamic>>> getPayments(String document) async {
   try {
-    final paymentDoc = await _firestore.collection('loan_payments').doc(document).get();
+    // Buscar el documento con el número de documento como campo
+    QuerySnapshot paymentSnapshot = await _firestore
+        .collection('loan_payments')
+        .where('document', isEqualTo: document)
+        .limit(1)
+        .get();
 
-    if (!paymentDoc.exists) {
+    if (paymentSnapshot.docs.isNotEmpty) {
+      final paymentDoc = paymentSnapshot.docs.first;
+      // Convertir correctamente los datos de 'loanPayments' a List<Map<String, dynamic>>
+      final data = paymentDoc.data() as Map<String, dynamic>?;
+      final List<Map<String, dynamic>> payments = List<Map<String, dynamic>>.from(data?['loanPayments'] ?? []);
+
+      return payments.map<Map<String, dynamic>>((payment) {
+        return {
+          'cuota': payment['cuota']?.toString() ?? '0.00',
+          'estado': payment['estado'] ?? false,
+        };
+      }).toList();
+    } else {
+      print('Error: Documento de pagos no encontrado.');
+    }
+  } catch (e) {
+    print('Error al obtener los pagos: $e');
+  }
+  return [];
+}
+Future<bool> processPayment(Map<String, dynamic> payment) async {
+  try {
+
+    // Buscar el documento de pagos con el número de documento
+    QuerySnapshot paymentSnapshot = await _firestore
+        .collection('loan_payments')
+        .where('document', isEqualTo: document)
+        .limit(1)
+        .get();
+
+    if (paymentSnapshot.docs.isEmpty) {
       print('Error: Documento de pago no encontrado.');
       return false;
     }
 
+    final paymentDoc = paymentSnapshot.docs.first;
+
     // Buscar el índice del pago
-    final paymentIndex = await _findPaymentIndex(payment);
+    final paymentIndex = await _findPaymentIndex(payment, paymentDoc);
     if (paymentIndex == -1) {
-      print('Error: Pago no encontrado.'); // Verificar la razón
+      print('Error: Pago no encontrado.');
       return false;
     }
 
     // Cambiar el estado del pago a true
-    List<dynamic> paymentsList = paymentDoc.data()?['payments'] ?? [];
-    paymentsList[paymentIndex]['estado'] = true; // Cambiar el estado a true
+    final data = paymentDoc.data() as Map<String, dynamic>; // Eliminamos el operador nulo
+    List<dynamic> paymentsList = data['loanPayments'] ?? [];
+
+    // Verificamos que 'paymentsList[paymentIndex]' sea un Map<String, dynamic>
+    if (paymentsList[paymentIndex] is Map<String, dynamic>) {
+      (paymentsList[paymentIndex] as Map<String, dynamic>)['estado'] = true;
+    } else {
+      print('Error: El formato del pago no es correcto.');
+      return false;
+    }
 
     // Obtener el balance actual del usuario
-    final userDoc = await _firestore.collection('users').doc(document).get();
-    double userBalance = double.tryParse(userDoc.data()?['balance']?.toString() ?? '0.0') ?? 0.0;
+    final userSnapshot = await _firestore.collection('loan_payments').where('document', isEqualTo: document).limit(1).get();
+    if (userSnapshot.docs.isEmpty) {
+      print('Error: Usuario no encontrado.');
+      return false;
+    }
+    final userDoc = userSnapshot.docs.first;
+    double userBalance = double.tryParse(userDoc.data()['balance']?.toString() ?? '0.0') ?? 0.0;
 
     // Obtener el monto a pagar
-    final amount = double.tryParse(payment['cuota']) ?? 0.0; // Convertir cuota a double
+    final amount = double.tryParse(payment['cuota']) ?? 0.0;
 
     // Verificar si hay saldo suficiente
     if (userBalance < amount) {
@@ -63,11 +96,11 @@ class PaymentController {
     double newBalance = userBalance - amount;
 
     // Actualizar los documentos en Firestore
-    await _firestore.collection('loan_payments').doc(document).update({
-      'payments': paymentsList,
+    await _firestore.collection('loan_payments').doc(paymentDoc.id).update({
+      'loanPayments': paymentsList,
     });
 
-    await _firestore.collection('users').doc(document).update({
+    await _firestore.collection('loan_payments').doc(paymentDoc.id).update({
       'balance': newBalance,
     });
 
@@ -78,27 +111,25 @@ class PaymentController {
   }
 }
 
+Future<int> _findPaymentIndex(Map<String, dynamic> payment, DocumentSnapshot paymentDoc) async {
+  final data = paymentDoc.data() as Map<String, dynamic>; // Eliminamos el operador nulo
+  final List<dynamic> paymentsList = data['loanPayments'] ?? [];
 
-  Future<int> _findPaymentIndex(Map<String, dynamic> payment) async {
-  final paymentDoc = await _firestore.collection('loan_payments').doc(document).get();
-  
-  if (paymentDoc.exists) {
-    final List<dynamic> paymentsList = paymentDoc.data()?['payments'] ?? [];
-    
-    // Buscar el índice del pago en la lista
-    for (int i = 0; i < paymentsList.length; i++) {
-      // Debugging
-      print('Comparando cuota: ${paymentsList[i]['cuota']} con ${payment['cuota']}');
-      print('Estado actual: ${paymentsList[i]['estado']}');
-      print('Estado esperado: ${payment['estado']}');
+  // Buscar el índice del pago en la lista
+  for (int i = 0; i < paymentsList.length; i++) {
+    final paymentMap = paymentsList[i] as Map<String, dynamic>; // Cast adecuado
 
-      // Comparar la cuota como cadena
-      if (paymentsList[i]['cuota'] == payment['cuota'] && paymentsList[i]['estado'] == false) {
-        return i; // Devuelve el índice si lo encontró
-      }
+    // Debugging
+    print('Comparando cuota: ${paymentMap['cuota']} con ${payment['cuota']}');
+    print('Estado actual: ${paymentMap['estado']}');
+    print('Estado esperado: ${payment['estado']}');
+
+    // Comparar la cuota como cadena
+    if (paymentMap['cuota'] == payment['cuota'] && paymentMap['estado'] == false) {
+      return i; // Devuelve el índice si lo encontró
     }
   }
-  
+
   return -1; // Devuelve -1 si no encontró el pago
 }
 

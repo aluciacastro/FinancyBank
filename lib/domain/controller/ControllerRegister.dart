@@ -49,11 +49,18 @@ class RegisterLogic {
       );
 
       // Guarda los datos adicionales en Firestore
-      await _firestore.collection('users').doc(userCredential.user?.uid).set({
+      final userId = userCredential.user?.uid;
+      await _firestore.collection('users').doc(userId).set({
         'name': name,
         'document': document,
         'dateOfBirth': dateOfBirth,
         'email': email,
+      });
+
+      // Crear documento en la colección 'loan_payments' con el atributo document
+      await _firestore.collection('loan_payments').add({
+        'document': document,
+        'balance': 500000.0,
       });
     } catch (e) {
       throw Exception('Error al registrar usuario: $e');

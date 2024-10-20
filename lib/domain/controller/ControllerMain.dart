@@ -11,25 +11,38 @@ class ControllerMain {
     }
 
     try {
-      // Consultamos Firebase para obtener el documento del usuario
+      // Consultamos Firebase para obtener el documento del usuario en la colección 'users'
       QuerySnapshot userSnapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('document', isEqualTo: document)
           .limit(1)
           .get();
 
-      if (userSnapshot.docs.isNotEmpty) {
+      // Consultamos Firebase para obtener el documento del balance en la colección 'loan_payments'
+      QuerySnapshot loanSnapshot = await FirebaseFirestore.instance
+          .collection('loan_payments')
+          .where('document', isEqualTo: document)
+          .limit(1)
+          .get();
+
+      if (userSnapshot.docs.isNotEmpty && loanSnapshot.docs.isNotEmpty) {
+        // Datos de la colección 'users' (nombre y foto)
         final userData = userSnapshot.docs.first.data() as Map<String, dynamic>;
+        final name = userData['name'] ?? 'Nombre no disponible';
+        final photoUrl = userData['photoUrl'];
 
-        // Si no existe el campo 'balance', lo inicializamos a 0.0
-        if (!userData.containsKey('balance')) {
-          await userSnapshot.docs.first.reference.update({'balance': 0.0});
-          userData['balance'] = 0.0;
-        }
+        // Datos de la colección 'loan_payments' (balance)
+        final loanData = loanSnapshot.docs.first.data() as Map<String, dynamic>;
+        final balance = loanData['balance'] ?? 0.0;
 
-        return userData;
+        // Retornar un Map combinado con todos los datos que necesitas
+        return {
+          'name': name,
+          'photoUrl': photoUrl,
+          'balance': balance,
+        };
       } else {
-        throw Exception('Usuario no encontrado');
+        throw Exception('Usuario o balance no encontrado');
       }
     } catch (e) {
       throw Exception('Error al obtener datos del usuario: $e');

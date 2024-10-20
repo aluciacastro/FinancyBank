@@ -12,7 +12,7 @@ class ControllerLoan {
 
     try {
       QuerySnapshot userSnapshot = await _firestore
-          .collection('users')
+          .collection('loan_payments')
           .where('document', isEqualTo: document)
           .limit(1)
           .get();
@@ -53,13 +53,16 @@ class ControllerLoan {
       if (!data.containsKey('debt')) {
         await userDoc.reference.set({'debt': 0}, SetOptions(merge: true));
       }
+      if (!data.containsKey('loanPayments')) {
+        await userDoc.reference.set({'loanPayments': []}, SetOptions(merge: true));
+      }
     }
   }
 
   Future<String> requestLoan(String document, double loanAmount, String interestType, List<Map<String, dynamic>> payments) async {
     try {
       QuerySnapshot userSnapshot = await _firestore
-          .collection('users')
+          .collection('loan_payments')
           .where('document', isEqualTo: document)
           .limit(1)
           .get();
@@ -76,10 +79,15 @@ class ControllerLoan {
             'hasActiveLoan': true,
             'loanAmount': loanAmount,
             'interestType': interestType,
-            'debt': loanAmount // Inicializar deuda con el monto del préstamo
+            'debt': loanAmount, // Inicializar deuda con el monto del préstamo
+            'loanStatus': 'active', // Estado del préstamo activo
+            'loanPayments': payments.map((payment) => {
+              'cuota': payment['cuota']?.toStringAsFixed(2) ?? '0.00',
+              'interes': payment['interes']?.toStringAsFixed(2) ?? '0.00',
+              'amortizacion': payment['amortizacion']?.toStringAsFixed(2) ?? '0.00',
+              'estado': false, // Pagos no realizados al inicio
+            }).toList(),
           }, SetOptions(merge: true));
-
-          await _storePayments(payments, userDoc.reference);
 
           return "Préstamo solicitado exitosamente.";
         } else {
@@ -91,18 +99,5 @@ class ControllerLoan {
     } catch (e) {
       return "Error al solicitar el préstamo: $e";
     }
-  }
-
-  Future<void> _storePayments(List<Map<String, dynamic>> payments, DocumentReference userDocRef) async {
-    await _firestore.collection('loan_payments').doc(userDocRef.id).set({
-      'document': userDocRef.id,
-      'loanStatus': 'active', // Estado del préstamo activo
-      'payments': payments.map((payment) => {
-        'cuota': payment['cuota']?.toStringAsFixed(2) ?? '0.00',
-        'interes': payment['interes']?.toStringAsFixed(2) ?? '0.00',
-        'amortizacion': payment['amortizacion']?.toStringAsFixed(2) ?? '0.00',
-        'estado': false, // Pagos no realizados al inicio
-      }).toList(),
-    }, SetOptions(merge: true));
   }
 }

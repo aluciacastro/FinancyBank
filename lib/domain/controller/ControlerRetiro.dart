@@ -8,20 +8,16 @@ class ControllerRetiro {
 
   Future<String> retirar(double monto) async {
     try {
-      // Validar que el monto sea mayor que cero
       if (monto <= 0) {
         return 'El monto debe ser mayor que cero.';
       }
 
-      // Obtener el documento del usuario desde SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? userDocument = prefs.getString('lastUserDocument');
-
       if (userDocument == null) {
         return 'No se encontró el documento del usuario en la caché.';
       }
 
-      // Buscar el usuario por su número de documento en Firestore
       QuerySnapshot usuarioSnapshot = await _firestore
           .collection('loan_payments')
           .where('document', isEqualTo: userDocument)
@@ -32,29 +28,22 @@ class ControllerRetiro {
         return 'El usuario no fue encontrado.';
       }
 
-      // Obtener el balance del usuario
       DocumentSnapshot usuarioData = usuarioSnapshot.docs.first;
       double usuarioBalance = usuarioData['balance'] as double? ?? 0.0;
-
-      // Verificar si el usuario tiene suficiente saldo para retirar
       if (usuarioBalance < monto) {
         return 'Saldo insuficiente.';
       }
 
-      // Calcular el nuevo saldo
       double nuevoSaldoUsuario = usuarioBalance - monto;
-
-      // Actualizar el balance en Firestore
       await _firestore.collection('loan_payments').doc(usuarioData.id).update({
         'balance': nuevoSaldoUsuario,
       });
 
-      // Registrar el movimiento en la colección "retiros_historial"
       await _firestore.collection('retiros_historial').add({
-        'document': userDocument, // Referencia del documento del usuario
+        'document': userDocument,
         'movimiento': {
           'descripcion': 'Retiro de $monto',
-          'fecha': FieldValue.serverTimestamp(), // Fecha del servidor
+          'fecha': FieldValue.serverTimestamp(),
           'monto': monto,
         }
       });
@@ -66,7 +55,6 @@ class ControllerRetiro {
     }
   }
 
-  // Método para obtener el nombre del usuario
   Future<String> obtenerNombreUsuario(String documentId) async {
     try {
       QuerySnapshot<Map<String, dynamic>> userDocs = await _firestore

@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, avoid_print
 
 import 'package:cesarpay/presentation/widget/Waves.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +41,7 @@ class _RetiroScreenState extends State<RetiroScreen> {
       _obtenerNombreUsuario(documentId);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Documento de usuario no encontrado en la caché')),
+        const SnackBar(content: Text('Documento de usuario no encontrado')),
       );
       Navigator.pop(context);
     }
@@ -89,52 +89,52 @@ class _RetiroScreenState extends State<RetiroScreen> {
     }
   }
 
-  Future<void> _realizarTransaccion(double monto) async {
-    try {
-      QuerySnapshot<Map<String, dynamic>> userDocs = await FirebaseFirestore.instance
-          .collection('users')
-          .where('document', isEqualTo: _documentId)
-          .limit(1)
-          .get();
-
-      if (userDocs.docs.isNotEmpty) {
-        DocumentSnapshot<Map<String, dynamic>> userDoc = userDocs.docs.first;
-        double balanceActual = userDoc.data()?['balance'] ?? 0.0;
-
-        if (monto > balanceActual) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('El monto excede el balance disponible')),
-          );
-        } else {
-          double nuevoSaldo = balanceActual - monto;
-          await FirebaseFirestore.instance.collection('users').doc(userDoc.id).update({
-            'balance': nuevoSaldo,
-          });
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ReciboRetiroScreen(
-                montoRetirado: monto,
-                nuevoSaldo: nuevoSaldo,
-                nombreUsuario: _nombreUsuario,
-                fechaRetiro: DateTime.now(),
-                documento: _documentId, // Agregado
-              ),
-            ),
-          );
-        }
-      } else {
+Future<void> _realizarTransaccion(double monto) async {
+  try {
+    QuerySnapshot<Map<String, dynamic>> userDocs = await FirebaseFirestore.instance
+        .collection('loan_payments')
+        .where('document', isEqualTo: _documentId)
+        .limit(1)
+        .get();
+    if (userDocs.docs.isNotEmpty) {
+      DocumentSnapshot<Map<String, dynamic>> userDoc = userDocs.docs.first;
+      double balanceActual = userDoc.data()?['balance'] ?? 0.0;
+      if (monto > balanceActual) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se encontró el usuario en la base de datos')),
+          const SnackBar(content: Text('El monto excede el balance disponible')),
+        );
+      } else {
+        double nuevoSaldo = balanceActual - monto;
+        await FirebaseFirestore.instance.collection('loan_payments').doc(userDoc.id).update({
+          'balance': nuevoSaldo,
+        });
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ReciboRetiroScreen(
+              montoRetirado: monto,
+              nuevoSaldo: nuevoSaldo,
+              nombreUsuario: _nombreUsuario,
+              fechaRetiro: DateTime.now(),
+              documento: _documentId, // Agregado
+            ),
+          ),
         );
       }
-    } catch (e) {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al realizar la transacción: $e')),
+        const SnackBar(content: Text('No se encontró el usuario en la base de datos')),
       );
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error al realizar la transacción: $e')),
+    );
   }
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {

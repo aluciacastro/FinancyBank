@@ -60,7 +60,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Retiro: \$${amount.toStringAsFixed(2)}',
+                                  'Movimiento: \$${amount.toStringAsFixed(2)}',
                                   style: const TextStyle(
                                     color: Colors.white, 
                                     fontSize: 20,

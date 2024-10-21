@@ -58,7 +58,7 @@ class ControllerRetiro {
   Future<String> obtenerNombreUsuario(String documentId) async {
     try {
       QuerySnapshot<Map<String, dynamic>> userDocs = await _firestore
-          .collection('loan_payments')
+          .collection('users')
           .where('document', isEqualTo: documentId)
           .get();
 
